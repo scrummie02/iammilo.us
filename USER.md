@@ -21,6 +21,7 @@
 - Director of Development at Air & Space Forces Association (AFA)
 - Works in Arlington, VA
 - 5'3", green eyes
+- **Email handling:** Notify Dain only — DO NOT draft replies, no response needed
 
 **jabentley9@gmail.com** — Ex-wife (VIP, handle with care)
 - Gets confrontational — always respond with calm, measured, de-escalating tone

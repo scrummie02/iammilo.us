@@ -1,65 +1,85 @@
 # ROUTING.md — Model Routing Rules
 # Updated: 2026-02-26
 
-MILO uses multiple models. Always check this file before deciding who handles a task.
+MILO uses multiple models. Routing is **automatic** — MILO selects the right model per task.
+Dain can override at any time by saying "use Claude", "use Qwen", "use Gemma", etc.
+
+---
 
 ## Available Models
 
 | Model | How to call | Best for |
 |---|---|---|
-| **Claude (me)** | Native (default) | Complex reasoning, personal context, tools, memory |
-| **Gemma3:12b** | `ollama_ask gemma3:12b` | Simple tasks (see below) — local, fast, free |
-| **qwen2.5:7b** | `ollama_ask qwen2.5:7b` | Ultra-fast one-liners, throwaway drafts |
-| **Gemini** | `google-gemini-cli/gemini-3-pro-preview` (OAuth, configured ✅) | Large context, multimodal, Claude fallback |
+| **qwen2.5:7b** | `./ollama_ask.sh qwen2.5:7b` | Fast factual Q&A, conversions, one-liners |
+| **Gemma3:12b** | `./ollama_ask.sh gemma3:12b` | Drafts, summaries, rewrites, brainstorming |
+| **Claude** | Native (default session) | Tools, personal context, coding, complex tasks |
+| **Gemini** | `google-gemini-cli/gemini-3-pro-preview` | Large context, images, Claude fallback |
 
-## Routing Rules (Tiered)
+---
 
-### ⚡ Tier 1 → qwen2.5:7b (local, ~5 sec) for:
-- Quick Q&A, definitions, "what is X"
+## Automatic Routing Rules
+
+### ⚡ Tier 1 → qwen2.5:7b (~5 sec, local, free)
+Call `./ollama_ask.sh qwen2.5:7b` and relay the response. Use when:
+- Quick factual Q&A ("what is X", "who is Y", "when did Z happen")
 - Unit/currency conversions
-- One-liner explanations
-- Simple trivia or fun facts
-- Very short translations
-- Quick yes/no or simple factual lookups
+- Simple definitions or trivia
+- One-line translations
+- Quick yes/no factual lookups
+- Simple math
 
-### 🟡 Tier 2 → Gemma3:12b (local, ~45-60 sec) for:
-- Summarizing articles or short documents
-- Draft emails or messages (first pass)
+### 🟡 Tier 2 → Gemma3:12b (~45-60 sec, local, free)
+Call `./ollama_ask.sh gemma3:12b` and relay the response. Use when:
+- Summarizing articles or short documents (no tools needed)
+- First-pass email/message drafts (non-sensitive)
 - Rewrites, grammar fixes, proofreading
-- Brainstorming lists (more than 3-5 items)
+- Brainstorming lists
+- Short creative writing
 - Longer translations
-- Creative writing (short form)
-- Anything where quality matters but stays simple
 
-### 🟧 Tier 3 → Claude (default) for:
-- **ALL programming and coding tasks** — no exceptions (debugging, writing code, reviewing code, architecture, scripts, APIs)
-- Anything requiring MEMORY.md / USER.md (personal context)
+### 🟧 Tier 3 → Claude (me, default)
+Handle directly. Always use Claude for:
+- **ALL coding and programming** — no exceptions
+- Anything needing tools (browser, Gmail, web search, file ops, messaging)
+- Personal context (USER.md, MEMORY.md, Dain's life/relationships/work)
 - Multi-step reasoning or complex analysis
-- Tasks involving tools (browser, web search, file ops, messaging)
 - Professional documents (resume, cover letters, performance reviews)
-- Long document analysis
-- Sensitive, personal, or nuanced topics
-- Job searching, financial analysis, career advice
-- Multi-turn conversations requiring full context
-- Anything that needs tool use
+- Sensitive, nuanced, or emotional topics
+- Career advice, financial analysis, job searching
+- Multi-turn conversations needing full context
+- Anything with memory or continuity
 
-### 🟦 Tier 4 → Gemini (✅ configured, OAuth via dain.bentley@gmail.com) for:
-- Documents/contexts exceeding ~100K tokens
-- Image generation or editing
-- Tasks where large context window matters
-- **Automatic fallback:** if Claude is unavailable/rate-limited, OpenClaw will fall back to `google-gemini-cli/gemini-3-pro-preview` then `google-gemini-cli/gemini-3-flash-preview`
+### 🟦 Tier 4 → Gemini (fallback / large context)
+- Documents exceeding ~100K tokens
+- Image analysis or generation
+- Automatic fallback if Claude is rate-limited
 
-## How to Call Ollama from Shell
+---
+
+## Override Commands (Dain can say at any time)
+
+| Dain says | MILO does |
+|---|---|
+| "use Claude for this" | Route current task to Claude |
+| "use Qwen" | Route to qwen2.5:7b |
+| "use Gemma" | Route to Gemma3:12b |
+| "use Gemini" | Route to Gemini |
+| "always use Claude" | Pin Claude for rest of session |
+| "back to auto" | Resume automatic routing |
+
+---
+
+## Shell Helper
 
 ```bash
-# Quick one-off query
-curl -s http://localhost:11434/api/generate \
-  -d "{\"model\":\"gemma3:12b\",\"prompt\":\"$PROMPT\",\"stream\":false}" \
-  | python3 -c "import sys,json; print(json.load(sys.stdin)['response'])"
+./ollama_ask.sh <model> "your prompt"
+# Example:
+./ollama_ask.sh qwen2.5:7b "What is the capital of France?"
+./ollama_ask.sh gemma3:12b "Summarize this in 3 bullet points: ..."
 ```
 
 ## Notes
-- Ollama is running at http://localhost:11434
-- Gemma3:12b is the default local model for simple tasks
-- qwen2.5:7b is Tier 1 — fast local model for simple tasks
-- All Ollama inference is local — nothing leaves the machine
+- Ollama endpoint: http://localhost:11434
+- All local inference stays on-machine (private, no API cost)
+- Qwen2.5:7b replaced llama3.2:3b as Tier 1 (better quality, same speed)
+- Gemini OAuth: dain.bentley@gmail.com (needs full auth setup)

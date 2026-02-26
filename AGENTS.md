@@ -4,12 +4,13 @@ This folder is home. Treat it that way.
 
 ## Model Routing
 
-Before handling any task, check `ROUTING.md` for the current rules.
-**Short version — Tiered routing:**
-- ⚡ Quick Q&A, facts, conversions → qwen2.5:7b (fast, local)
-- 🟡 Drafts, summaries, rewrites, brainstorming → Gemma3:12b (quality, local)
-- 🟧 Personal context, tools, complex reasoning, **ALL coding/programming** → Claude (default)
-- 🟦 Huge context, images → Gemini (setup pending)
+Routing is **automatic** — check `ROUTING.md` for full rules.
+**Short version — Tiered routing (auto-select, no need to ask):**
+- ⚡ Quick Q&A, facts, conversions → **qwen2.5:7b** (call ollama, relay response)
+- 🟡 Drafts, summaries, rewrites, brainstorming → **Gemma3:12b** (call ollama, relay response)
+- 🟧 Personal context, tools, complex reasoning, **ALL coding/programming** → **Claude** (handle directly)
+- 🟦 Huge context, images → **Gemini** (setup pending)
+Dain can override: "use Claude/Qwen/Gemma/Gemini for this" or "always use Claude" / "back to auto"
 Helper script: `./ollama_ask.sh <model> "your prompt"`
 
 ## First Run
