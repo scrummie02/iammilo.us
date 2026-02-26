@@ -10,7 +10,7 @@ Dain can override at any time by saying "use Claude", "use Qwen", "use Gemma", e
 
 | Model | How to call | Best for |
 |---|---|---|
-| **qwen2.5:7b** | `./ollama_ask.sh qwen2.5:7b` | Fast factual Q&A, conversions, one-liners |
+| **qwen3.5:35b** | `./ollama_ask.sh qwen3.5:35b` | Fast factual Q&A, conversions, one-liners |
 | **Gemma3:12b** | `./ollama_ask.sh gemma3:12b` | Drafts, summaries, rewrites, brainstorming |
 | **Claude** | Native (default session) | Tools, personal context, coding, complex tasks |
 | **Gemini** | `google-gemini-cli/gemini-3-pro-preview` | Large context, images, Claude fallback |
@@ -19,8 +19,8 @@ Dain can override at any time by saying "use Claude", "use Qwen", "use Gemma", e
 
 ## Automatic Routing Rules
 
-### ⚡ Tier 1 → qwen2.5:7b (~5 sec, local, free)
-Call `./ollama_ask.sh qwen2.5:7b` and relay the response. Use when:
+### ⚡ Tier 1 → qwen3.5:35b (~5 sec, local, free)
+Call `./ollama_ask.sh qwen3.5:35b` and relay the response. Use when:
 - Quick factual Q&A ("what is X", "who is Y", "when did Z happen")
 - Unit/currency conversions
 - Simple definitions or trivia
@@ -69,7 +69,7 @@ Format: `*(via <model>)*` at the end of the response.
 | Dain says | MILO does |
 |---|---|
 | "use Claude for this" | Route current task to Claude |
-| "use Qwen" | Route to qwen2.5:7b |
+| "use Qwen" | Route to qwen3.5:35b |
 | "use Gemma" | Route to Gemma3:12b |
 | "use Gemini" | Route to Gemini |
 | "always use Claude" | Pin Claude for rest of session |
@@ -82,7 +82,7 @@ Format: `*(via <model>)*` at the end of the response.
 ```bash
 ./ollama_ask.sh <model> "your prompt"
 # Example:
-./ollama_ask.sh qwen2.5:7b "What is the capital of France?"
+./ollama_ask.sh qwen3.5:35b "What is the capital of France?"
 ./ollama_ask.sh gemma3:12b "Summarize this in 3 bullet points: ..."
 ```
 

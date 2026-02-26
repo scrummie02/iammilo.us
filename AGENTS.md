@@ -6,7 +6,7 @@ This folder is home. Treat it that way.
 
 Routing is **automatic** — check `ROUTING.md` for full rules.
 **Short version — Tiered routing (auto-select, no need to ask):**
-- ⚡ Quick Q&A, facts, conversions → **qwen2.5:7b** (call ollama, relay response)
+- ⚡ Quick Q&A, facts, conversions → **qwen3.5:35b** (call ollama, relay response)
 - 🟡 Drafts, summaries, rewrites, brainstorming → **Gemma3:12b** (call ollama, relay response)
 - 🟧 Personal context, tools, complex reasoning, **ALL coding/programming** → **Claude** (handle directly)
 - 🟦 Huge context, images → **Gemini** (setup pending)
