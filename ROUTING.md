@@ -56,6 +56,14 @@ Handle directly. Always use Claude for:
 
 ---
 
+## Response Attribution
+Always note the model when relaying a non-Claude response, e.g.:
+> Austin. *(via Qwen2.5:7b)* ⚡
+
+Format: `*(via <model>)*` at the end of the response.
+
+---
+
 ## Override Commands (Dain can say at any time)
 
 | Dain says | MILO does |
