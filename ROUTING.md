@@ -9,12 +9,12 @@ MILO uses multiple models. Always check this file before deciding who handles a 
 |---|---|---|
 | **Claude (me)** | Native (default) | Complex reasoning, personal context, tools, memory |
 | **Gemma3:12b** | `ollama_ask gemma3:12b` | Simple tasks (see below) — local, fast, free |
-| **llama3.2:3b** | `ollama_ask llama3.2:3b` | Ultra-fast one-liners, throwaway drafts |
+| **qwen2.5:7b** | `ollama_ask qwen2.5:7b` | Ultra-fast one-liners, throwaway drafts |
 | **Gemini** | `google-gemini-cli/gemini-3-pro-preview` (OAuth, configured ✅) | Large context, multimodal, Claude fallback |
 
 ## Routing Rules (Tiered)
 
-### ⚡ Tier 1 → llama3.2:3b (local, ~5 sec) for:
+### ⚡ Tier 1 → qwen2.5:7b (local, ~5 sec) for:
 - Quick Q&A, definitions, "what is X"
 - Unit/currency conversions
 - One-liner explanations
@@ -61,5 +61,5 @@ curl -s http://localhost:11434/api/generate \
 ## Notes
 - Ollama is running at http://localhost:11434
 - Gemma3:12b is the default local model for simple tasks
-- llama3.2:3b is the fallback if speed is critical
+- qwen2.5:7b is Tier 1 — fast local model for simple tasks
 - All Ollama inference is local — nothing leaves the machine
