@@ -17,8 +17,11 @@
 ## People
 
 **Julie Siegel** — Girlfriend
+- Email: julie.a.siegel84@gmail.com (VIP — notify Dain immediately)
 - Director of Development at Air & Space Forces Association (AFA)
 - Works in Arlington, VA
 - 5'3", green eyes
+
+**jabentley9@gmail.com** — VIP contact (Bentley family member — notify Dain immediately)
 
 *(Learning more...)*
