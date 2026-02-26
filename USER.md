@@ -22,6 +22,9 @@
 - Works in Arlington, VA
 - 5'3", green eyes
 
-**jabentley9@gmail.com** — VIP contact (Bentley family member — notify Dain immediately)
+**jabentley9@gmail.com** — Ex-wife (VIP, handle with care)
+- Gets confrontational — always respond with calm, measured, de-escalating tone
+- Keep replies short, factual, no defensiveness or over-explaining
+- Draft reply → show Dain on Telegram → send only if he confirms YES
 
 *(Learning more...)*
