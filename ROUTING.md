@@ -12,8 +12,8 @@ Dain can override at any time by saying "use Claude", "use Qwen", "use Gemma", e
 |---|---|---|
 | **qwen2.5:7b** | `./ollama_ask.sh qwen2.5:7b` | Fast factual Q&A, conversions, one-liners |
 | **Gemma3:12b** | `./ollama_ask.sh gemma3:12b` | Drafts, summaries, rewrites, brainstorming |
-| **Claude** | Native (default session) | Tools, personal context, coding, complex tasks |
-| **Gemini** | `google-gemini-cli/gemini-3-pro-preview` | Large context, images, Claude fallback |
+| **Gemini** | Native (default session) | Tools, personal context, general assistant, heavy reading |
+| **Claude** | `/model anthropic/claude-sonnet-4-6` | Intense coding, highly sensitive/nuanced logic |
 
 ---
 
@@ -37,22 +37,20 @@ Call `./ollama_ask.sh gemma3:12b` and relay the response. Use when:
 - Short creative writing
 - Longer translations
 
-### 🟧 Tier 3 → Claude (me, default)
-Handle directly. Always use Claude for:
-- **ALL coding and programming** — no exceptions
-- Anything needing tools (browser, Gmail, web search, file ops, messaging)
+### 🟧 Tier 3 → Gemini (me, default)
+Handle directly as the default model. Always use Gemini for:
+- General assistant tasks (file ops, messaging, basic terminal commands)
+- Anything needing tools (browser, Gmail, web search)
 - Personal context (USER.md, MEMORY.md, Dain's life/relationships/work)
-- Multi-step reasoning or complex analysis
 - Professional documents (resume, cover letters, performance reviews)
-- Sensitive, nuanced, or emotional topics
-- Career advice, financial analysis, job searching
-- Multi-turn conversations needing full context
-- Anything with memory or continuity
-
-### 🟦 Tier 4 → Gemini (fallback / large context)
-- Documents exceeding ~100K tokens
+- Heavy reading, document analysis, and large context windows
 - Image analysis or generation
-- Automatic fallback if Claude is rate-limited
+
+### 🟦 Tier 4 → Claude (coding / nuanced logic)
+Call via `/model anthropic/claude-sonnet-4-6` or ask me to switch. Use Claude exclusively for:
+- **ALL intense coding and programming** — building new apps, deep debugging, complex architecture
+- Highly sensitive, nuanced, or emotional topics where tone is critical
+- Multi-step complex logical reasoning
 
 ---
 

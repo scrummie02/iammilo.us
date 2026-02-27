@@ -8,8 +8,8 @@ Routing is **automatic** — check `ROUTING.md` for full rules.
 **Short version — Tiered routing (auto-select, no need to ask):**
 - ⚡ Quick Q&A, facts, conversions → **qwen2.5:7b** (call ollama, relay response)
 - 🟡 Drafts, summaries, rewrites, brainstorming → **Gemma3:12b** (call ollama, relay response)
-- 🟧 Personal context, tools, complex reasoning, **ALL coding/programming** → **Claude** (handle directly)
-- 🟦 Huge context, images → **Gemini** (setup pending)
+- 🟧 Personal context, tools, general assistant tasks, heavy reading → **Gemini** (handle directly, default)
+- 🟦 Intense coding, complex architecture, nuanced logic → **Claude** (call via `/model` or ask)
 Dain can override: "use Claude/Qwen/Gemma/Gemini for this" or "always use Claude" / "back to auto"
 Helper script: `./ollama_ask.sh <model> "your prompt"`
 
