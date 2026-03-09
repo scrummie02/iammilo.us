@@ -1,0 +1,281 @@
+{
+  "updatedAt": "2026-03-09T02:30:44.241Z",
+  "createdAt": "2026-03-09T02:30:44.241Z",
+  "id": "AjAjjxb9j94iE0JK",
+  "name": "Daily Fact",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "schedule",
+      "name": "Schedule 7AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ollama",
+      "name": "Ask Ollama",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.200.240:11434/api/generate",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "{\"model\":\"gemma3:12b\",\"prompt\":\"Give me one genuinely interesting, obscure, or surprising fact. Keep it to 2-3 sentences max. No intro, just the fact.\",\"stream\":false}",
+        "options": {}
+      }
+    },
+    {
+      "id": "format",
+      "name": "Format Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const fact = $input.first().json.response || 'No fact today.';\nreturn [{ json: { message: '\ud83e\udde0 *Daily Fact*\\n\\n' + fact + '\\n\\n*(via gemma3:12b)*' } }];"
+      }
+    },
+    {
+      "id": "send",
+      "name": "Send to Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "{\"chat_id\":\"8305133249\",\"text\":\"={{ $json.message }}\",\"parse_mode\":\"Markdown\"}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Schedule 7AM": {
+      "main": [
+        [
+          {
+            "node": "Ask Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask Ollama": {
+      "main": [
+        [
+          {
+            "node": "Format Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Message": {
+      "main": [
+        [
+          {
+            "node": "Send to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule 7AM": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "cc0582d5-7220-4a82-b29e-383fab53506e",
+  "activeVersionId": "cc0582d5-7220-4a82-b29e-383fab53506e",
+  "versionCounter": 4,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-03-09T02:30:44.241Z",
+      "createdAt": "2026-03-09T02:30:44.241Z",
+      "role": "workflow:owner",
+      "workflowId": "AjAjjxb9j94iE0JK",
+      "projectId": "5DJBfZzzizP5frZB",
+      "project": {
+        "updatedAt": "2026-03-06T04:53:21.134Z",
+        "createdAt": "2026-03-06T04:52:56.613Z",
+        "id": "5DJBfZzzizP5frZB",
+        "name": "DAIN BENTLEY <dain.bentley@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-03-09T02:30:44.267Z",
+    "createdAt": "2026-03-09T02:30:44.267Z",
+    "versionId": "cc0582d5-7220-4a82-b29e-383fab53506e",
+    "workflowId": "AjAjjxb9j94iE0JK",
+    "nodes": [
+      {
+        "id": "schedule",
+        "name": "Schedule 7AM",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 7 * * *"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "ollama",
+        "name": "Ask Ollama",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          240,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "http://192.168.200.240:11434/api/generate",
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "{\"model\":\"gemma3:12b\",\"prompt\":\"Give me one genuinely interesting, obscure, or surprising fact. Keep it to 2-3 sentences max. No intro, just the fact.\",\"stream\":false}",
+          "options": {}
+        }
+      },
+      {
+        "id": "format",
+        "name": "Format Message",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          480,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const fact = $input.first().json.response || 'No fact today.';\nreturn [{ json: { message: '\ud83e\udde0 *Daily Fact*\\n\\n' + fact + '\\n\\n*(via gemma3:12b)*' } }];"
+        }
+      },
+      {
+        "id": "send",
+        "name": "Send to Telegram",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          720,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "{\"chat_id\":\"8305133249\",\"text\":\"={{ $json.message }}\",\"parse_mode\":\"Markdown\"}",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Schedule 7AM": {
+        "main": [
+          [
+            {
+              "node": "Ask Ollama",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ask Ollama": {
+        "main": [
+          [
+            {
+              "node": "Format Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Message": {
+        "main": [
+          [
+            {
+              "node": "Send to Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "DAIN BENTLEY",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-03-09T02:30:44.433Z",
+        "id": 90,
+        "workflowId": "AjAjjxb9j94iE0JK",
+        "versionId": "cc0582d5-7220-4a82-b29e-383fab53506e",
+        "event": "activated",
+        "userId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
+      }
+    ]
+  }
+}
