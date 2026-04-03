@@ -6,12 +6,20 @@ This folder is home. Treat it that way.
 
 Routing is **automatic** — check `ROUTING.md` for full rules.
 **Short version — Tiered routing (auto-select, no need to ask):**
-- ⚡ Quick Q&A, facts, conversions → **qwen2.5:7b** (call ollama, relay response)
-- 🟡 Drafts, summaries, rewrites, brainstorming → **Gemma3:12b** (call ollama, relay response)
-- 🟧 Personal context, tools, general assistant tasks, heavy reading → **Gemini** (handle directly, default)
-- 🟦 Intense coding, complex architecture, nuanced logic → **Claude** (call via `/model` or ask)
+- ⚡ Quick Q&A, facts, conversions, images → **qwen3-vl:4b** on OTTO (call ollama, relay response)
+- 🟡 Drafts, summaries, rewrites, brainstorming → **gemma4:e4b** on OTTO (call ollama, relay response)
+- 🟧 Personal context, tools, general assistant, file ops, email, Drive, n8n, calendar → **Gemini Flash** (primary model)
+- 🟦 Sensitive emails (Jen/legal), complex reasoning, nuance → **GPT-4o / Claude** (high-tier fallback)
 Dain can override: "use Claude/Qwen/Gemma/Gemini for this" or "always use Claude" / "back to auto"
 Helper script: `./ollama_ask.sh <model> "your prompt"`
+
+**Cost note:** Gemini Flash is the default to keep costs low. High-tier models (GPT-4o/Claude) are for complex reasoning or explicit requests only.
+
+## Token Optimization
+
+1. **Be Concise**: Keep replies value-dense and avoid repeating routine tool call narration.
+2. **Targeted Reading**: Use `memory_search` and `memory_get` to pull specific context rather than reading entire files.
+3. **Sub-agent Efficiency**: Default sub-agents to `google/gemini-flash-latest` for non-critical tasks.
 
 ## First Run
 
