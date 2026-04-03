@@ -1,0 +1,156 @@
+{
+  "name": "Notary Request Intake (Auto-Reply & Alert)",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "q": "is:unread -from:me"
+        }
+      },
+      "id": "trigger-gmail",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyAnnVmRDJTCRGKBvM80tEGpKmBa-f0CFpY",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"contents\": [{\n    \"parts\": [{\n      \"text\": \"Analyze this email. Is it a request for notary services or loan signing? If yes, extract the following: clientName, serviceType, preferredDateTime, location, phone. Return ONLY a valid JSON object with the keys: isNotaryRequest (boolean), clientName (string), serviceType (string), preferredDateTime (string), location (string), phone (string). If the info is missing, put 'Not provided'.\\n\\nEmail Subject: {{ $json.subject.replace(/\\\"/g, '\\\\\\\"').replace(/\\n/g, ' ') }}\\nEmail Body: {{ ($json.textPlain || $json.snippet || '').replace(/\\\"/g, '\\\\\\\"').replace(/\\n/g, ' ') }}\"\n    }]\n  }],\n  \"generationConfig\": {\n    \"response_mime_type\": \"application/json\"\n  }\n}"
+      },
+      "id": "gemini-extract",
+      "name": "Extract with Gemini",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "try {\n  const text = $input.first().json.candidates[0].content.parts[0].text;\n  const data = JSON.parse(text);\n  \n  data.originalSender = $('Gmail Trigger').first().json.from.value || $('Gmail Trigger').first().json.from;\n  data.originalSubject = $('Gmail Trigger').first().json.subject;\n  \n  return [{ json: data }];\n} catch (e) {\n  return [{ json: { isNotaryRequest: false, error: e.message } }];\n}"
+      },
+      "id": "parse-json",
+      "name": "Parse AI Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.isNotaryRequest }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check-if-notary",
+      "name": "Is Notary Request?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"chat_id\": \"8305133249\",\n  \"text\": \"🚨 *New Notary Request* 🚨\\n\\n*Client:* {{ $json.clientName }}\\n*Service:* {{ $json.serviceType }}\\n*When:* {{ $json.preferredDateTime }}\\n*Where:* {{ $json.location }}\\n*Phone:* {{ $json.phone }}\\n\\n_Auto-reply has been sent._\",\n  \"parse_mode\": \"Markdown\"\n}"
+      },
+      "id": "notify-telegram",
+      "name": "Notify Dain",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, -100]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "={{ $json.originalSender }}",
+        "subject": "=Re: {{ $json.originalSubject }}",
+        "message": "Hi {{ $json.clientName !== 'Not provided' ? $json.clientName : 'there' }},\n\nThank you for reaching out to Dain Bentley Management.\n\nI have received your request for notary services. I will review your details and get back to you shortly to confirm our appointment.\n\nBest regards,\n\nDain Bentley\nDain Bentley Management LLC",
+        "appendAttribution": false
+      },
+      "id": "auto-reply",
+      "name": "Auto-Reply to Client",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [900, 100]
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extract with Gemini",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract with Gemini": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Output": {
+      "main": [
+        [
+          {
+            "node": "Is Notary Request?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Notary Request?": {
+      "main": [
+        [
+          {
+            "node": "Notify Dain",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Auto-Reply to Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "active": false
+}

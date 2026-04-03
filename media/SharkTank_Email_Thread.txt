@@ -1,0 +1,192 @@
+id	19d3186da5d39de3
+thread_id	19d3186da5d39de3
+label_ids	INBOX
+from	Jen Bentley Stephens <jabentley9@gmail.com>
+to	Ann LaBarge <alabarge@stmschool.org>
+subject	UPDATE REQUESTED: SharkTank project
+date	Fri, 27 Mar 2026 19:00:01 -0400
+
+attachment	IMG_9561.png	347.5 KB	image/png	ANGjdJ_8XRsZYiPw6jb5yzmad2U04sdYnMJTVsWbf5XkikAKtJTNgvt9F66YJT2p6exWLRnG62_7g-z6q7vFQccfyU4JwgxTWxCP89_A7l0LH6s8zzMo7sL_w8HzTHi5Ts1i1EcSb7lGBNO5z3Jc5-BIkQd2kvRStjIfHgY7Wfme7EY_iTiO1-fJpM1OdH0K0Txdazr5qewKWGwJObkFDY7nK3LoSW2H-Cw1lhCytKhmqbybniPm7oKCzpCawcymxa_6b5sec7WTLG7tsJBpLPVMD4k91Oqg_3fDkbq3SWyaT9GXIjpkvF_hRIXQK7LriGZw03zyTfxi1rfUi1sVyNokdtqoUgBz5RYW9QtrSPquYitVkanEoEQMkXaD2CxwgbrCeUv_H1ntfGiDMkfe
+attachment	IMG_9569.png	371.6 KB	image/png	ANGjdJ8TSKDMlncdmpJHFJiWNBWtBbGAP5dFooCHO-BVDZakMjpSRLyHqU_KYSYZ49vH5WdK3mCpZxeVziAe9MZ6aItgeTppZcwUFGG5WfJjCEE1ZzNUDvvehugvhWLU0ERnuXY1Hyt3n9U5B0dtVs6b9IbB4JTo1gm8BYc9Uw6DkFfFIbD_DQfBG-gukrpk7LZxlfyfLdiSZnO-Cl09_aOi6ujXdKULd-MwMhXTvBm7bFVzG_LJB0exNo-DcGzRrD9EAV0RIPH20UBHHaDZzUBG8p1J_J1o7XSTzEGOcPEnF2CE3APxj5yOrsgpcW7cHgDAiWa_W_w1S8w85N37RxUUBhV0raEUpudXc4tftIEJC8FWnUp3qe58VxWM6kQAIKSSLLfcDwMA4nJ5se-sutW5BxXUaMcBnV8PIDmzRQ
+attachment	IMG_9566.png	406.8 KB	image/png	ANGjdJ_q60u0MMxrcljOrmUMGSonsBJwks4OcEWhcucuiJaHMPudZCjU26KFLwvQJwf5PlzwgMlaj4JoIOhRQgLJsgGxl7Z0HCtyiEzIp8MVfdpQAiqHBfXjAlZ4cKuHOw7FUFvN_Vwe6rj7yWlaEgg8EN1WbLAp_jq63sFOSkJreqgh3nxMd-NdsTq5nIefL6cOSiAkTCx_ijT6cDfUC2wO8WE-e6P4C423IU0bPO7MAVDCvBCXt43Cn2kyFKzMy6d2zX4wBY5kQAWbNHNfcM3-4t12DxhjV2JxJdWcp8_UaJ9q9jpWiD_hCnr1L70dvVPn8HRjId8yDnwQlNVGydgSstkDpX12tgAWoPOYEjrsCo-w7Wji3DRX37NEsLNI1F_jhOSEDlqo-zPouw3mnUW96xRDSxs-yDwyZbC-KA
+attachment	IMG_9568.png	418.9 KB	image/png	ANGjdJ-IYhZUOwrt5m_P365Ouu1xqvlWdFGrwlM8MRJ3agCbaAXbNY1FLLwjX9tHR4eYiGTAK9uMNRSzl1h7lhtSzL1mvNpdKvQffSyDlJYgU3wNdIuGvqysXPiL9pKwqeqbtC26YuIyOSDcJLHlPR11NezLrMhuA-oUy3sOuqrstHG6kRO__y9q0-YYCzjcmoKOicGbNGEJJPL71S9kcwALQZrUVIHr9UbTCnhjgv3PI45g2GiIgCLdlzrmjB4YIxiKNdCqo3IiBkflXT_f_XL58SRYfW17kB43isJVGqIajcFmAjkbuBS8Tr0cr1rW_HbtnvbRxiDD6xnHgAW-qan5vZf80HRp83gkCRYSYvcB1hyRYY6gJQd93m329unKQPwZbMf1JkpuM1J0i4FRQ7AW3-gU-hWVsh167B0Q6w
+attachment	IMG_9558.png	390.2 KB	image/png	ANGjdJ8mizznJ_5rOzGwn6RR7ySEd8Oxs557l6Hk1-BlRFqc5HEXWPpoCZrf5GV2Mtq826V0J1KW32EBuon1LUcbw5FJ_WPKWMTKsLuU6WzqhxTC4KfJaTM1TGhf_4mWFkIz4IvGZKN1huszYqHbuqR4VDbYwgz8DNrfOYP58xDfUqZMvmDFkvK1It0xAU9yYqFCrrMf97brlsTqbxQYevr_K8Iuohd54Bdimma82AGRhuJ_4EGqpiNVbsYPCe1CpG2IG5AJvGOU2Fbbd8ZJ6jnkITuLJjaVE_FYCftNLAcxPGRLBP3iPkXb6UymHUUH-rpb2_QezWkDr868_QbiubXySEaBJQHiA7r6fE6qT0KicwxHyNGsTzd1gd8rxsmJZ6LsdzFdPJZNUNeTGf-woiuSQoxT1a5u1KT-551zbg
+
+Ann,
+
+Please provide the detailed information from Google Docs that you said
+shows Charlotte has not been providing input to the Shark Tank project.  I
+looked at the proposal and brain storming documents on Google Docs and it
+shows Charlotte editing the document as often as other students in the
+group. If she truly hasn’t been contributing, then that is an issue. But
+the document history I can see doesn’t show this to be the case at all in,
+at least the planning documents. In fact, it shows Charlotte has been
+telling the truth.
+
+She said she was made just a “commenter” and “viewer” many different times
+through this project, not an editor, and she was removed several times when
+she was still in the group for the final slides.
+
+Looking at the proposal and brainstorming document history today, she
+wasn’t lying. Ellen removed *both* Faith and Charlotte from being editors
+on *numerous* occasions (please see attached, these are only a few
+examples).
+
+That is bullying and ultimately caused a fight that got Charlotte removed
+from the group. This isn’t ok. I assume it will be addressed and not swept
+under the rug.  Perhaps the member of the group who removed their access
+should have to start from scratch…like Charlotte. It could be a very
+important lesson in intellectual property violation and the effects of
+bullying behavior.
+
+Charlotte brought it up to the group several times but was afraid to report
+it to the teacher because she didn’t want anyone to be mad at her. She said
+she would make edits and Ellen would delete them. Hillary usually added
+Charlotte and Faith back as editors. Sometimes Ellen did, I am guessing
+when work needed to be completed or when one of them complained too loudly.
+
+ Please provide the full details from that document by Monday afternoon. I
+would like this for our records in the event she isn’t given a fair
+opportunity to complete a project that has been MONTHS in the working, and
+also if she is docked by the judges because she is not presenting as a
+group. She poured her heart into that proposal for “SafeAlly”.
+
+The idea was Charlotte’s, and now it’s being used to do exactly what the
+project was built to report, bullying. While Charlotte says she wants to
+work alone…it is only because she feels bullied and ostracized. Her new
+topic was approved today and I know she will do amazing, but spring break
+is ruined and a project that was very dear to her was ripped away.
+
+While you don’t ever want to assume Charlotte is telling the truth, and you
+assume that she is constantly the problem, perhaps you need to revisit
+middle school and understand it is the kid lashing out and getting mean all
+of a sudden, after months of doing great, that is usually the one being
+bullied and made to feel worthless by classmates and teachers. The one who
+constantly is blamed for everything…is usually taking the blame or not
+speaking up because they are scared it will get worse. The “nicest
+girl/boy” to the teachers, is usually one of the meanest to their peers.
+Much like the “kindness award” the boy in Charlotte’s class got, less than
+2 weeks after Charlotte and Ellen reported him for bullying to the
+administration, which was a huge slap in the face to them.
+
+The idea that we should just “*cut our losses now and just leave the school
+before the end of the year*” because I asked what had been done in the
+classroom by the teacher to help a group of teenagers understand they don't
+have to like each other to do a project together, is absurd.
+
+We are appreciative of all the “bending over backwards” (your words) the
+school has done to help Charlotte and other kids get the assistance and
+help they need to be successful. Truly. But to say that to me today, after
+supporting STM for 9 years, was incredibly disrespectful, dismissive and
+defensive behavior. It certainly doesn’t display the values Charlotte’s
+teachers and other staff have helped instill in her.
+
+Please provide the detailed history for the document she “wasn’t
+contributing” to. I would like to see how many times she was removed and
+how many times her editing rights were taken away by Ellen and/or the other
+group members. As it is our child being accused of not contributing and it
+is the major cause of this entire issue this week, we have a right to know.
+
+
+If this is not provided, I can file a formal complaint and inquiry with Dr.
+Vorbach, Father Posey, and the Bishop directly…if that’s what you prefer.
+
+Thank you,
+Jen
+
+On Wed, Mar 25, 2026 at 8:15 PM Jen Bentley Stephens <jabentley9@gmail.com>
+wrote:
+
+> Thank you so much Gabriela.
+>
+> We ended up going to Arlington Children’s Behavioral Healthcare Services
+> Emergency office. It was a productive encounter. They do not provide
+> clearance letters at this facility,
+> though she said I can get something that says Charlotte was seen. She
+> recommended Charlotte take tomorrow off with the idea to do something fun
+> outside in the sun. It also gives us the full day to try to get in with her
+> therapist and psychiatrist. Charlotte proactively reached out to her old
+> therapist herself and asked her if they could talk tomorrow. Charlotte
+> reaching out to her directly is a huge step, and while in person therapy is
+> ideal, at this point just having someone she trusts and she’s willing to
+> talk to is most important. I will send her therapist the form to sign once
+> we are able to schedule with her. I should be able to schedule her
+> psychiatrist appointment for tomorrow or Friday. It was too late after we
+> left the clinic.
+>
+> Charlotte does not feel as though she is a danger to herself or anyone
+> else at this time and is more hurt and angry than anything. I do, as does
+> the therapist she talked to today, believe there is still bullying
+> occurring after all these years, as well as mobbing behavior since now she
+> is feeling isolated, is being laughed by groups of kids, she’s sitting
+> alone at lunch and  kids are being asked to essentially “testify” against
+> her.
+>
+> Understanding my child isn’t perfect and definitely has said hurtful
+> things, I can see how even in times like today, when choices could have
+> been made to make a child feel loved, safe, and cared about…she felt
+> unheard and attacked.  *I ask that if there are future incidents, which
+> hopefully there won’t be, that one of her trusted adults can be with her
+> please. Mr Godfrey, Ms Hannel, or Ms Kelly.  I believe this would have
+> helped de-escalate things and make her feel safe. I have asked for this in
+> previous meetings as well. *She has been particularly anxious since the
+> incident last week with the suspicious package as she was in the church at
+> the time. And she mentioned *another incident that happened yesterday
+> that I am interested to hear more about from the school regarding someone
+> trespassing on the property?*
+>
+> Charlotte wants to do well but feels like everyone is against her. I agree
+> that she wasn’t kind to Ellen and several others, and she plans to
+> apologize for throwing the book (and has already apologized to Tyler), but
+> I have also seen and heard her working hard on the science project with her
+> group the last several months. Now there is a disagreement between friends
+> and all of a sudden Charlotte is the full problem and everyone has turned
+> on her at once? Something doesn’t add up. If Ellen also threw (or shoved)
+> the book at Charlotte, she should be made to apologize as well. Being nice
+> and respectful goes both ways.
+>
+> We will provide a letter from Charlotte’s therapist tomorrow provided we
+> can get an appointment with her that fast.  I expect she will return to
+> school on Friday.
+>
+> Thank you,
+> Jen
+>
+>
+> On Wed, Mar 25, 2026 at 6:12 PM Gabriela Marcus <counselor@stmschool.org>
+> wrote:
+>
+>> Hello,
+>>
+>> The letter is at school. I’ll make sure to email it to you as soon as I
+>> get to school tomorrow.
+>>
+>> Kindly,
+>> Gabriela
+>>
+>> On Wed, Mar 25, 2026 at 5:01 PM Ann LaBarge <alabarge@stmschool.org>
+>> wrote:
+>>
+>>> Mrs. Marcus has the letter, hopefully she will see this and send it to
+>>> you.
+>>>
+>>> Blessings,
+>>> Ann LaBarge, M.Ed.
+>>> Principal
+>>> St. Thomas More Cathedral School
+>>>
+>>>
+>>>
+>>>
+>>>
+>>> On Wed, Mar 25, 2026 at 4:59 PM Jen Bentley Stephens <
+>>> jabentley9@gmail.com> wrote:
+>>>
+>>>> Good evening. Can you please email me the letter Charlotte wrote. Her
+>>>> therapist would like to see it.
+>>>>
+>>>> Thank you.
+>>>> Jen
+>>>>
+>>>
+

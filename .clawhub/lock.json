@@ -4,6 +4,30 @@
     "google-messages-openclaw-skill": {
       "version": "0.1.0",
       "installedAt": 1772048831698
+    },
+    "news-summary": {
+      "version": "1.0.1",
+      "installedAt": 1772483374671
+    },
+    "reddit-readonly": {
+      "version": "1.0.0",
+      "installedAt": 1772483545720
+    },
+    "n8n": {
+      "version": "2.0.0",
+      "installedAt": 1772540821019
+    },
+    "claw2immich": {
+      "version": "1.0.0",
+      "installedAt": 1772637797607
+    },
+    "twilio": {
+      "version": "1.0.1",
+      "installedAt": 1772663281174
+    },
+    "onedrive-integration": {
+      "version": "0.1.0",
+      "installedAt": 1773026292959
     }
   }
 }

@@ -1,0 +1,13 @@
+[Unit]
+Description=NFS Backup Share
+After=network-online.target
+Wants=network-online.target
+
+[Mount]
+What=192.168.200.224:/data/Backups
+Where=/mnt/backups
+Type=nfs
+Options=defaults,_netdev,auto
+
+[Install]
+WantedBy=multi-user.target

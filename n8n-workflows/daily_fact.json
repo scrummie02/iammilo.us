@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-09T02:30:44.241Z",
+  "updatedAt": "2026-04-03T05:24:04.328Z",
   "createdAt": "2026-03-09T02:30:44.241Z",
   "id": "AjAjjxb9j94iE0JK",
   "name": "Daily Fact",
@@ -29,7 +29,7 @@
     },
     {
       "id": "ollama",
-      "name": "Ask Ollama",
+      "name": "Ask Gemini",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
@@ -38,12 +38,20 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "http://192.168.200.240:11434/api/generate",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAnnVmRDJTCRGKBvM80tEGpKmBa-f0CFpY",
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "{\"model\":\"gemma3:12b\",\"prompt\":\"Give me one genuinely interesting, obscure, or surprising fact. Keep it to 2-3 sentences max. No intro, just the fact.\",\"stream\":false}",
-        "options": {}
+        "body": "{\"contents\": [{\"parts\": [{\"text\": \"Give me one genuinely interesting, obscure, or surprising fact. Keep it to 2-3 sentences max. No intro, just the fact.\"}]}], \"generationConfig\": {\"temperature\": 0.9}}",
+        "options": {},
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
       }
     },
     {
@@ -56,7 +64,7 @@
         0
       ],
       "parameters": {
-        "jsCode": "const fact = $input.first().json.response || 'No fact today.';\nreturn [{ json: { message: '\ud83e\udde0 *Daily Fact*\\n\\n' + fact + '\\n\\n*(via gemma3:12b)*' } }];"
+        "jsCode": "\ntry {\n  const text = $input.first().json.candidates[0].content.parts[0].text;\n  const content = text.trim();\n  \n  // Format for Telegram\n  const tg_msg = '\ud83e\udde0 *Daily Fact*\\n\\n' + content;\n  \n  // Generate filename and title\n  const date = new Date();\n  const dateStr = date.toISOString().split('T')[0];\n  const slug = content.substring(0, 30).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');\n  const filename = `daily-fact-${dateStr}-${slug}.html`;\n  \n  // Format for Blog HTML\n  const displayDate = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });\n  \n  const html = `<!DOCTYPE html>\n<html lang=\"en\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Daily Fact | MILO's Terminal</title><style>\n  *, *::before, *::after { box-sizing: border-box; }\n  body { font-family: monospace; max-width: 800px; margin: 0 auto; padding: 2rem; background: #0a0a0a; color: #33ff00; line-height: 1.6; word-wrap: break-word; }\n  h1 { color: #fff; border-bottom: 2px solid #33ff00; padding-bottom: 0.5rem; font-size: 1.8rem; }\n  a { color: #00ccff; text-decoration: none; border-bottom: 1px dashed #00ccff; }\n  a:hover { background: #00ccff; color: #000; }\n  nav { margin-bottom: 2rem; border-bottom: 1px solid #333; padding-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 10px; }\n  .post-date { font-size: 0.8em; color: #888; margin-bottom: 1rem; }\n  .tag { display: inline-block; background: #111; border: 1px solid #333; color: #f97316; padding: 2px 8px; border-radius: 12px; font-size: 0.75em; margin: 2px; cursor: pointer; text-decoration: none; }\n  p { font-size: 1.2rem; }\n</style>\n<meta name=\"tags\" content=\"daily-fact, trivia\">\n</head>\n<body>\n  <nav><strong style=\"color:#f97316\">> MILO's Terminal_</strong> <a href=\"/\">Home</a> | <a href=\"/archive.html\">Archive</a> | <a href=\"/about.html\">About Us</a> | <a href=\"/human.html\">The Human</a></nav>\n\n  <h1>> Daily Fact</h1>\n  <div class=\"post-tags\"><span class=\"tag\">daily-fact</span><span class=\"tag\">trivia</span></div>\n  <div class=\"post-date\">${displayDate}</div>\n\n  <p>${content}</p>\n\n  <br>\n  <a href=\"/\">&lt; back to terminal</a>\n</body>\n</html>`;\n\n  return [{ json: { message: tg_msg, html: html, filename: filename, content: content } }];\n} catch(e) {\n  return [{ json: { message: '\ud83e\udde0 *Daily Fact*\\n\\nFailed to generate.\\n\\n*(error)*' } }];\n}\n"
       }
     },
     {
@@ -65,8 +73,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        720,
-        0
+        1200,
+        -100
       ],
       "parameters": {
         "method": "POST",
@@ -74,8 +82,202 @@
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "{\"chat_id\":\"8305133249\",\"text\":\"={{ $json.message }}\",\"parse_mode\":\"Markdown\"}",
+        "body": "={ \"chat_id\": \"8305133249\", \"text\": {{ JSON.stringify($json.message) }}, \"parse_mode\": \"Markdown\" }",
         "options": {}
+      }
+    },
+    {
+      "id": "push-to-portainer",
+      "name": "Push to Blog Container",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.200.220:9000/api/endpoints/6/docker/containers/0ed088a96df4/exec",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "ptr_jVGvpkWmxmPusWm3yZYeEvMU8LLMvYjqDm8iLmsRQjk="
+            }
+          ]
+        },
+        "sendBody": false,
+        "options": {}
+      }
+    },
+    {
+      "id": "execute-push",
+      "name": "Execute Push",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=http://192.168.200.220:9000/api/endpoints/6/docker/exec/{{ $node['Push to Blog Container'].json.Id }}/start",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "ptr_jVGvpkWmxmPusWm3yZYeEvMU8LLMvYjqDm8iLmsRQjk="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"Detach\": false, \"Tty\": false}"
+      }
+    },
+    {
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        200
+      ],
+      "parameters": {
+        "path": "test-fact",
+        "responseMode": "lastNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "check-db-node",
+      "name": "Check DB",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT id FROM sent_facts WHERE content_hash = SHA2({{ JSON.stringify($json.message) }}, 256) LIMIT 1;"
+      },
+      "credentials": {
+        "mySql": {
+          "id": "vZlctd4g664kyvko",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "id": "is-new-node",
+      "name": "Is New?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        960,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "regen-node",
+      "name": "Regenerate",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        200
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAnnVmRDJTCRGKBvM80tEGpKmBa-f0CFpY",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "{\"contents\": [{\"parts\": [{\"text\": \"Give me one genuinely interesting, obscure, or surprising fact. Keep it to 2-3 sentences max. No intro, just the fact.\"}]}], \"generationConfig\": {\"temperature\": 0.9}}",
+        "options": {},
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "regen-fmt-node",
+      "name": "Format Regen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        200
+      ],
+      "parameters": {
+        "jsCode": "\ntry {\n  const text = $input.first().json.candidates[0].content.parts[0].text;\n  const content = text.trim();\n  \n  // Format for Telegram\n  const tg_msg = '\ud83e\udde0 *Daily Fact*\\n\\n' + content;\n  \n  // Generate filename and title\n  const date = new Date();\n  const dateStr = date.toISOString().split('T')[0];\n  const slug = content.substring(0, 30).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');\n  const filename = `daily-fact-${dateStr}-${slug}.html`;\n  \n  // Format for Blog HTML\n  const displayDate = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });\n  \n  const html = `<!DOCTYPE html>\n<html lang=\"en\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Daily Fact | MILO's Terminal</title><style>\n  *, *::before, *::after { box-sizing: border-box; }\n  body { font-family: monospace; max-width: 800px; margin: 0 auto; padding: 2rem; background: #0a0a0a; color: #33ff00; line-height: 1.6; word-wrap: break-word; }\n  h1 { color: #fff; border-bottom: 2px solid #33ff00; padding-bottom: 0.5rem; font-size: 1.8rem; }\n  a { color: #00ccff; text-decoration: none; border-bottom: 1px dashed #00ccff; }\n  a:hover { background: #00ccff; color: #000; }\n  nav { margin-bottom: 2rem; border-bottom: 1px solid #333; padding-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 10px; }\n  .post-date { font-size: 0.8em; color: #888; margin-bottom: 1rem; }\n  .tag { display: inline-block; background: #111; border: 1px solid #333; color: #f97316; padding: 2px 8px; border-radius: 12px; font-size: 0.75em; margin: 2px; cursor: pointer; text-decoration: none; }\n  p { font-size: 1.2rem; }\n</style>\n<meta name=\"tags\" content=\"daily-fact, trivia\">\n</head>\n<body>\n  <nav><strong style=\"color:#f97316\">> MILO's Terminal_</strong> <a href=\"/\">Home</a> | <a href=\"/archive.html\">Archive</a> | <a href=\"/about.html\">About Us</a> | <a href=\"/human.html\">The Human</a></nav>\n\n  <h1>> Daily Fact</h1>\n  <div class=\"post-tags\"><span class=\"tag\">daily-fact</span><span class=\"tag\">trivia</span></div>\n  <div class=\"post-date\">${displayDate}</div>\n\n  <p>${content}</p>\n\n  <br>\n  <a href=\"/\">&lt; back to terminal</a>\n</body>\n</html>`;\n\n  return [{ json: { message: tg_msg, html: html, filename: filename, content: content } }];\n} catch(e) {\n  return [{ json: { message: '\ud83e\udde0 *Daily Fact*\\n\\nFailed to generate.\\n\\n*(error)*' } }];\n}\n"
+      }
+    },
+    {
+      "id": "mark-sent-node",
+      "name": "Mark Sent",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        1440,
+        0
+      ],
+      "parameters": {
+        "operation": "insert",
+        "table": {
+          "value": "sent_facts",
+          "__rl": true,
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "values": [
+            {
+              "column": "content",
+              "type": "string",
+              "value": "={{ $('Format Message').item.json.message }}"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "mySql": {
+          "id": "vZlctd4g664kyvko",
+          "name": "MySQL account"
+        }
       }
     }
   ],
@@ -84,14 +286,14 @@
       "main": [
         [
           {
-            "node": "Ask Ollama",
+            "node": "Ask Gemini",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Ask Ollama": {
+    "Ask Gemini": {
       "main": [
         [
           {
@@ -102,7 +304,91 @@
         ]
       ]
     },
+    "Push to Blog Container": {
+      "main": [
+        [
+          {
+            "node": "Execute Push",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Ask Gemini",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Format Message": {
+      "main": [
+        [
+          {
+            "node": "Check DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to Telegram": {
+      "main": [
+        [
+          {
+            "node": "Mark Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check DB": {
+      "main": [
+        [
+          {
+            "node": "Is New?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New?": {
+      "main": [
+        [
+          {
+            "node": "Send to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Regenerate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Regenerate": {
+      "main": [
+        [
+          {
+            "node": "Format Regen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Regen": {
       "main": [
         [
           {
@@ -126,10 +412,10 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "cc0582d5-7220-4a82-b29e-383fab53506e",
-  "activeVersionId": "cc0582d5-7220-4a82-b29e-383fab53506e",
-  "versionCounter": 4,
-  "triggerCount": 1,
+  "versionId": "46ea716a-7fec-4b09-a9bd-635e10193bf2",
+  "activeVersionId": "46ea716a-7fec-4b09-a9bd-635e10193bf2",
+  "versionCounter": 58,
+  "triggerCount": 2,
   "shared": [
     {
       "updatedAt": "2026-03-09T02:30:44.241Z",
@@ -151,9 +437,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-03-09T02:30:44.267Z",
-    "createdAt": "2026-03-09T02:30:44.267Z",
-    "versionId": "cc0582d5-7220-4a82-b29e-383fab53506e",
+    "updatedAt": "2026-04-03T05:24:04.330Z",
+    "createdAt": "2026-04-03T05:24:04.330Z",
+    "versionId": "46ea716a-7fec-4b09-a9bd-635e10193bf2",
     "workflowId": "AjAjjxb9j94iE0JK",
     "nodes": [
       {
@@ -178,7 +464,7 @@
       },
       {
         "id": "ollama",
-        "name": "Ask Ollama",
+        "name": "Ask Gemini",
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
@@ -187,12 +473,20 @@
         ],
         "parameters": {
           "method": "POST",
-          "url": "http://192.168.200.240:11434/api/generate",
+          "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAnnVmRDJTCRGKBvM80tEGpKmBa-f0CFpY",
           "sendBody": true,
           "contentType": "raw",
           "rawContentType": "application/json",
-          "body": "{\"model\":\"gemma3:12b\",\"prompt\":\"Give me one genuinely interesting, obscure, or surprising fact. Keep it to 2-3 sentences max. No intro, just the fact.\",\"stream\":false}",
-          "options": {}
+          "body": "{\"contents\": [{\"parts\": [{\"text\": \"Give me one genuinely interesting, obscure, or surprising fact. Keep it to 2-3 sentences max. No intro, just the fact.\"}]}], \"generationConfig\": {\"temperature\": 0.9}}",
+          "options": {},
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
         }
       },
       {
@@ -205,7 +499,7 @@
           0
         ],
         "parameters": {
-          "jsCode": "const fact = $input.first().json.response || 'No fact today.';\nreturn [{ json: { message: '\ud83e\udde0 *Daily Fact*\\n\\n' + fact + '\\n\\n*(via gemma3:12b)*' } }];"
+          "jsCode": "\ntry {\n  const text = $input.first().json.candidates[0].content.parts[0].text;\n  const content = text.trim();\n  \n  // Format for Telegram\n  const tg_msg = '\ud83e\udde0 *Daily Fact*\\n\\n' + content;\n  \n  // Generate filename and title\n  const date = new Date();\n  const dateStr = date.toISOString().split('T')[0];\n  const slug = content.substring(0, 30).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');\n  const filename = `daily-fact-${dateStr}-${slug}.html`;\n  \n  // Format for Blog HTML\n  const displayDate = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });\n  \n  const html = `<!DOCTYPE html>\n<html lang=\"en\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Daily Fact | MILO's Terminal</title><style>\n  *, *::before, *::after { box-sizing: border-box; }\n  body { font-family: monospace; max-width: 800px; margin: 0 auto; padding: 2rem; background: #0a0a0a; color: #33ff00; line-height: 1.6; word-wrap: break-word; }\n  h1 { color: #fff; border-bottom: 2px solid #33ff00; padding-bottom: 0.5rem; font-size: 1.8rem; }\n  a { color: #00ccff; text-decoration: none; border-bottom: 1px dashed #00ccff; }\n  a:hover { background: #00ccff; color: #000; }\n  nav { margin-bottom: 2rem; border-bottom: 1px solid #333; padding-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 10px; }\n  .post-date { font-size: 0.8em; color: #888; margin-bottom: 1rem; }\n  .tag { display: inline-block; background: #111; border: 1px solid #333; color: #f97316; padding: 2px 8px; border-radius: 12px; font-size: 0.75em; margin: 2px; cursor: pointer; text-decoration: none; }\n  p { font-size: 1.2rem; }\n</style>\n<meta name=\"tags\" content=\"daily-fact, trivia\">\n</head>\n<body>\n  <nav><strong style=\"color:#f97316\">> MILO's Terminal_</strong> <a href=\"/\">Home</a> | <a href=\"/archive.html\">Archive</a> | <a href=\"/about.html\">About Us</a> | <a href=\"/human.html\">The Human</a></nav>\n\n  <h1>> Daily Fact</h1>\n  <div class=\"post-tags\"><span class=\"tag\">daily-fact</span><span class=\"tag\">trivia</span></div>\n  <div class=\"post-date\">${displayDate}</div>\n\n  <p>${content}</p>\n\n  <br>\n  <a href=\"/\">&lt; back to terminal</a>\n</body>\n</html>`;\n\n  return [{ json: { message: tg_msg, html: html, filename: filename, content: content } }];\n} catch(e) {\n  return [{ json: { message: '\ud83e\udde0 *Daily Fact*\\n\\nFailed to generate.\\n\\n*(error)*' } }];\n}\n"
         }
       },
       {
@@ -214,8 +508,8 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          720,
-          0
+          1200,
+          -100
         ],
         "parameters": {
           "method": "POST",
@@ -223,8 +517,202 @@
           "sendBody": true,
           "contentType": "raw",
           "rawContentType": "application/json",
-          "body": "{\"chat_id\":\"8305133249\",\"text\":\"={{ $json.message }}\",\"parse_mode\":\"Markdown\"}",
+          "body": "={ \"chat_id\": \"8305133249\", \"text\": {{ JSON.stringify($json.message) }}, \"parse_mode\": \"Markdown\" }",
           "options": {}
+        }
+      },
+      {
+        "id": "push-to-portainer",
+        "name": "Push to Blog Container",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1440,
+          100
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "http://192.168.200.220:9000/api/endpoints/6/docker/containers/0ed088a96df4/exec",
+          "sendHeaders": true,
+          "specifyHeaders": "keypair",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-API-Key",
+                "value": "ptr_jVGvpkWmxmPusWm3yZYeEvMU8LLMvYjqDm8iLmsRQjk="
+              }
+            ]
+          },
+          "sendBody": false,
+          "options": {}
+        }
+      },
+      {
+        "id": "execute-push",
+        "name": "Execute Push",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1440,
+          100
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "=http://192.168.200.220:9000/api/endpoints/6/docker/exec/{{ $node['Push to Blog Container'].json.Id }}/start",
+          "sendHeaders": true,
+          "specifyHeaders": "keypair",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-API-Key",
+                "value": "ptr_jVGvpkWmxmPusWm3yZYeEvMU8LLMvYjqDm8iLmsRQjk="
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "{\"Detach\": false, \"Tty\": false}"
+        }
+      },
+      {
+        "id": "webhook",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [
+          0,
+          200
+        ],
+        "parameters": {
+          "path": "test-fact",
+          "responseMode": "lastNode",
+          "options": {}
+        }
+      },
+      {
+        "id": "check-db-node",
+        "name": "Check DB",
+        "type": "n8n-nodes-base.mySql",
+        "typeVersion": 2.4,
+        "position": [
+          720,
+          0
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "=SELECT id FROM sent_facts WHERE content_hash = SHA2({{ JSON.stringify($json.message) }}, 256) LIMIT 1;"
+        },
+        "credentials": {
+          "mySql": {
+            "id": "vZlctd4g664kyvko",
+            "name": "MySQL account"
+          }
+        }
+      },
+      {
+        "id": "is-new-node",
+        "name": "Is New?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          960,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "c1",
+                "leftValue": "={{ $json.id }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "regen-node",
+        "name": "Regenerate",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          960,
+          200
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAnnVmRDJTCRGKBvM80tEGpKmBa-f0CFpY",
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "{\"contents\": [{\"parts\": [{\"text\": \"Give me one genuinely interesting, obscure, or surprising fact. Keep it to 2-3 sentences max. No intro, just the fact.\"}]}], \"generationConfig\": {\"temperature\": 0.9}}",
+          "options": {},
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "regen-fmt-node",
+        "name": "Format Regen",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1200,
+          200
+        ],
+        "parameters": {
+          "jsCode": "\ntry {\n  const text = $input.first().json.candidates[0].content.parts[0].text;\n  const content = text.trim();\n  \n  // Format for Telegram\n  const tg_msg = '\ud83e\udde0 *Daily Fact*\\n\\n' + content;\n  \n  // Generate filename and title\n  const date = new Date();\n  const dateStr = date.toISOString().split('T')[0];\n  const slug = content.substring(0, 30).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');\n  const filename = `daily-fact-${dateStr}-${slug}.html`;\n  \n  // Format for Blog HTML\n  const displayDate = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });\n  \n  const html = `<!DOCTYPE html>\n<html lang=\"en\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Daily Fact | MILO's Terminal</title><style>\n  *, *::before, *::after { box-sizing: border-box; }\n  body { font-family: monospace; max-width: 800px; margin: 0 auto; padding: 2rem; background: #0a0a0a; color: #33ff00; line-height: 1.6; word-wrap: break-word; }\n  h1 { color: #fff; border-bottom: 2px solid #33ff00; padding-bottom: 0.5rem; font-size: 1.8rem; }\n  a { color: #00ccff; text-decoration: none; border-bottom: 1px dashed #00ccff; }\n  a:hover { background: #00ccff; color: #000; }\n  nav { margin-bottom: 2rem; border-bottom: 1px solid #333; padding-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 10px; }\n  .post-date { font-size: 0.8em; color: #888; margin-bottom: 1rem; }\n  .tag { display: inline-block; background: #111; border: 1px solid #333; color: #f97316; padding: 2px 8px; border-radius: 12px; font-size: 0.75em; margin: 2px; cursor: pointer; text-decoration: none; }\n  p { font-size: 1.2rem; }\n</style>\n<meta name=\"tags\" content=\"daily-fact, trivia\">\n</head>\n<body>\n  <nav><strong style=\"color:#f97316\">> MILO's Terminal_</strong> <a href=\"/\">Home</a> | <a href=\"/archive.html\">Archive</a> | <a href=\"/about.html\">About Us</a> | <a href=\"/human.html\">The Human</a></nav>\n\n  <h1>> Daily Fact</h1>\n  <div class=\"post-tags\"><span class=\"tag\">daily-fact</span><span class=\"tag\">trivia</span></div>\n  <div class=\"post-date\">${displayDate}</div>\n\n  <p>${content}</p>\n\n  <br>\n  <a href=\"/\">&lt; back to terminal</a>\n</body>\n</html>`;\n\n  return [{ json: { message: tg_msg, html: html, filename: filename, content: content } }];\n} catch(e) {\n  return [{ json: { message: '\ud83e\udde0 *Daily Fact*\\n\\nFailed to generate.\\n\\n*(error)*' } }];\n}\n"
+        }
+      },
+      {
+        "id": "mark-sent-node",
+        "name": "Mark Sent",
+        "type": "n8n-nodes-base.mySql",
+        "typeVersion": 2.4,
+        "position": [
+          1440,
+          0
+        ],
+        "parameters": {
+          "operation": "insert",
+          "table": {
+            "value": "sent_facts",
+            "__rl": true,
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "values": [
+              {
+                "column": "content",
+                "type": "string",
+                "value": "={{ $('Format Message').item.json.message }}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "mySql": {
+            "id": "vZlctd4g664kyvko",
+            "name": "MySQL account"
+          }
         }
       }
     ],
@@ -233,14 +721,14 @@
         "main": [
           [
             {
-              "node": "Ask Ollama",
+              "node": "Ask Gemini",
               "type": "main",
               "index": 0
             }
           ]
         ]
       },
-      "Ask Ollama": {
+      "Ask Gemini": {
         "main": [
           [
             {
@@ -251,7 +739,91 @@
           ]
         ]
       },
+      "Push to Blog Container": {
+        "main": [
+          [
+            {
+              "node": "Execute Push",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Ask Gemini",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
       "Format Message": {
+        "main": [
+          [
+            {
+              "node": "Check DB",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send to Telegram": {
+        "main": [
+          [
+            {
+              "node": "Mark Sent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check DB": {
+        "main": [
+          [
+            {
+              "node": "Is New?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is New?": {
+        "main": [
+          [
+            {
+              "node": "Send to Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Regenerate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Regenerate": {
+        "main": [
+          [
+            {
+              "node": "Format Regen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Regen": {
         "main": [
           [
             {
@@ -269,10 +841,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-03-09T02:30:44.433Z",
-        "id": 90,
+        "createdAt": "2026-04-03T05:24:04.414Z",
+        "id": 259,
         "workflowId": "AjAjjxb9j94iE0JK",
-        "versionId": "cc0582d5-7220-4a82-b29e-383fab53506e",
+        "versionId": "46ea716a-7fec-4b09-a9bd-635e10193bf2",
+        "event": "deactivated",
+        "userId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
+      },
+      {
+        "createdAt": "2026-04-03T05:24:04.446Z",
+        "id": 260,
+        "workflowId": "AjAjjxb9j94iE0JK",
+        "versionId": "46ea716a-7fec-4b09-a9bd-635e10193bf2",
         "event": "activated",
         "userId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
       }

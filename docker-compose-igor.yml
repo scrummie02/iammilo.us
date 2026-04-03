@@ -1,0 +1,48 @@
+# PREREQUISITE (Run on host CachyOS first):
+# sudo pacman -S intel-compute-runtime oneapi-level-zero-gpu clinfo intel-gpu-tools
+
+services:
+  ollama-intel:
+    image: intelanalytics/ipex-llm-inference-cpp-xpu:latest
+    container_name: ipex-ollama-cachy
+    # Crucial for Intel GPU access
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - ./ollama_models:/root/.ollama/models
+    ports:
+      - "11434:11434"
+    # Essential for loading large models (70B+) into shared RAM
+    shm_size: '32gb'
+    deploy:
+      resources:
+        limits:
+          memory: 84gb
+    environment:
+      - OLLAMA_NUM_GPU=999
+      - ZES_ENABLE_SYSMAN=1
+      - SYCL_CACHE_PERSISTENT=1
+    # Initializes the Intel-specific Ollama binary then starts the server
+    # Note: Use Reasoning Distilled versions for higher intelligence on this hardware:
+    # 27B Dense Reasoning:
+    # ollama run hf.co/Jackrong/Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled-GGUF:Q4_K_M
+    # 35B MoE Reasoning (Speed + Logic):
+    # ollama run hf.co/samuelcardillo/Qwen3.5-35B-A3B-Claude-4.6-Opus-Reasoning-Distilled-GGUF:Q4_K_M
+    # 9B Uncensored (Aggressive Variant):
+    # ollama run hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M
+    command: bash -c "init-ollama && ollama serve"
+    restart: unless-stopped
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    volumes:
+      - ./open-webui:/app/backend/data
+    environment:
+      - 'OLLAMA_BASE_URL=http://ollama-intel:11434'
+      - 'WEBUI_SECRET_KEY=t1-milo-secret-key'
+    depends_on:
+      - ollama-intel

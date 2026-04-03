@@ -6,8 +6,8 @@ This folder is home. Treat it that way.
 
 Routing is **automatic** — check `ROUTING.md` for full rules.
 **Short version — Tiered routing (auto-select, no need to ask):**
-- ⚡ Quick Q&A, facts, conversions, images → **qwen3-vl:4b** on OTTO (call ollama, relay response)
-- 🟡 Drafts, summaries, rewrites, brainstorming → **gemma4:e4b** on OTTO (call ollama, relay response)
+- ⚡ Quick Q&A, facts, conversions, simple tasks → **gemma4:e4b** on OTTO (call ollama, relay response)
+- 🟡 Drafts, summaries, rewrites, image analysis → **qwen3-vl:4b** on OTTO (call ollama, relay response)
 - 🟧 Personal context, tools, general assistant, file ops, email, Drive, n8n, calendar → **Gemini Flash** (primary model)
 - 🟦 Sensitive emails (Jen/legal), complex reasoning, nuance → **GPT-4o / Claude** (high-tier fallback)
 Dain can override: "use Claude/Qwen/Gemma/Gemini for this" or "always use Claude" / "back to auto"

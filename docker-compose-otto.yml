@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  ollama:
+    image: ollama/ollama:rocm
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - HSA_OVERRIDE_GFX_VERSION=10.3.0
+      - OLLAMA_MAX_LOADED_MODELS=1 # only one model in VRAM
+      - OLLAMA_NUM_PARALLEL=2 
+    shm_size: '16gb'
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    group_add:
+      - "987"
+      - "983"
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "3030:8080"
+    volumes:
+      - open-webui_data:/app/backend/data
+    environment:
+      - 'OLLAMA_BASE_URL=http://ollama:11434'
+      - 'WEBUI_SECRET_KEY=otto-milo-secret-key'
+    depends_on:
+      - ollama
+
+volumes:
+  ollama_data:
+  open-webui_data:

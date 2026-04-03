@@ -1,0 +1,35 @@
+baseURL = "http://192.168.200.223:8090/"
+languageCode = "en-us"
+title = "Dain Bentley Infrastructure Docs"
+theme = "PaperMod"
+
+[params]
+  description = "Technical documentation for the Dain Bentley home lab and automation stack"
+  author = "MILO"
+  ShowBreadCrumbs = true
+  ShowPostNavLinks = true
+  ShowCodeCopyButtons = true
+  ShowToc = true
+  TocOpen = false
+
+[menu]
+  [[menu.main]]
+    name = "Overview"
+    url = "/overview/"
+    weight = 1
+  [[menu.main]]
+    name = "Infrastructure"
+    url = "/infrastructure/"
+    weight = 2
+  [[menu.main]]
+    name = "Agents"
+    url = "/agents/"
+    weight = 3
+  [[menu.main]]
+    name = "Workflows"
+    url = "/workflows/"
+    weight = 4
+  [[menu.main]]
+    name = "N8N"
+    url = "/n8n/"
+    weight = 5

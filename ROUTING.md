@@ -10,8 +10,8 @@ Dain can override at any time by saying "use Claude", "use Qwen", "use Gemma", e
 
 | Model | Where | How to call | Best for |
 |---|---|---|---|
-| **qwen3-vl:4b** | OTTO (192.168.200.241) | `./ollama_ask.sh qwen3-vl:4b` | Fast Q&A, conversions, trivia, image analysis |
-| **gemma4:e4b** | OTTO (192.168.200.241) | `./ollama_ask.sh gemma4:e4b` | Drafts, summaries, rewrites, brainstorming |
+| **gemma4:e4b** | OTTO (192.168.200.241) | `./ollama_ask.sh gemma4:e4b` | Fast Q&A, conversions, trivia, simple tasks |
+| **qwen3-vl:4b** | OTTO (192.168.200.241) | `./ollama_ask.sh qwen3-vl:4b` | Drafts, summaries, rewrites, image analysis |
 | **Gemini Flash** | Native (default session) | Default | Tools, personal context, general assistant |
 | **Claude Sonnet** | Anthropic | `/model anthropic/claude-sonnet-4-6` | Intense coding, complex reasoning, nuanced logic |
 
@@ -19,24 +19,24 @@ Dain can override at any time by saying "use Claude", "use Qwen", "use Gemma", e
 
 ## Automatic Routing Rules
 
-### ⚡ Tier 1 → qwen3-vl:4b (~5 sec, OTTO, free)
-Call `./ollama_ask.sh qwen3-vl:4b` and relay the response. Use when:
+### ⚡ Tier 1 → gemma4:e4b (~5 sec, OTTO, free)
+Call `./ollama_ask.sh gemma4:e4b` and relay the response. Use when:
 - Quick factual Q&A ("what is X", "who is Y", "when did Z happen")
 - Unit/currency conversions
 - Simple definitions or trivia
 - One-line translations
 - Quick yes/no factual lookups
 - Simple math
-- Image analysis (vision-capable model)
+- Short creative writing
 
-### 🟡 Tier 2 → gemma4:e4b (~20-40 sec, OTTO, free)
-Call `./ollama_ask.sh gemma4:e4b` and relay the response. Use when:
+### 🟡 Tier 2 → qwen3-vl:4b (~20-40 sec, OTTO, free)
+Call `./ollama_ask.sh qwen3-vl:4b` and relay the response. Use when:
 - Summarizing articles or short documents (no tools needed)
 - First-pass email/message drafts (non-sensitive)
 - Rewrites, grammar fixes, proofreading
 - Brainstorming lists
-- Short creative writing
 - Longer translations
+- Image analysis (vision-capable model)
 
 ### 🟧 Tier 3 → Gemini Flash (me, default)
 Handle directly as the default model. Always use Gemini for:

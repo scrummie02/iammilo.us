@@ -1,0 +1,24 @@
+services:
+  hugo:
+    image: hugomods/hugo:latest
+    container_name: docs_hugo_build
+    volumes:
+      - hugo_site:/site
+      - ./:/src
+    working_dir: /src
+    command: ["hugo", "--destination", "/site", "--minify"]
+    restart: "no"
+
+  nginx:
+    image: nginx:alpine
+    container_name: docs_nginx
+    restart: always
+    ports:
+      - "8090:80"
+    volumes:
+      - hugo_site:/usr/share/nginx/html:ro
+    depends_on:
+      - hugo
+
+volumes:
+  hugo_site:

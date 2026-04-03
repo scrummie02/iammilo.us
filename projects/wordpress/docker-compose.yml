@@ -1,0 +1,84 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: wordpress_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change_me_root}
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wp_user
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change_me_wp}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - wp_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  wordpress:
+    depends_on:
+      db:
+        condition: service_healthy
+    image: wordpress:latest
+    container_name: wordpress_app
+    restart: always
+    ports:
+      - "127.0.0.1:8080:80"   # localhost only — put Nginx/Caddy in front for public
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wp_user
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD:-change_me_wp}
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+      - ./mu-plugins:/var/www/html/wp-content/mu-plugins   # auto-loaded plugins (static trigger lives here)
+      - static_output:/var/www/static                       # static site output volume
+    networks:
+      - wp_network
+
+  wpcli:
+    image: wordpress:cli
+    container_name: wordpress_cli
+    profiles:
+      - cli
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wp_user
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD:-change_me_wp}
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+      - static_output:/var/www/static
+    working_dir: /var/www/html
+    networks:
+      - wp_network
+    # Usage: docker compose run --rm wpcli wp <command>
+    # e.g.:  docker compose run --rm wpcli wp plugin install simply-static --activate
+    entrypoint: ["wp", "--allow-root"]
+
+  # Serves the generated static site on port 8081
+  static:
+    image: nginx:alpine
+    container_name: wordpress_static
+    restart: always
+    ports:
+      - "127.0.0.1:8081:80"
+    volumes:
+      - static_output:/usr/share/nginx/html:ro
+    networks:
+      - wp_network
+
+networks:
+  wp_network:
+    driver: bridge
+
+volumes:
+  db_data:
+  wordpress_data:
+  static_output:
