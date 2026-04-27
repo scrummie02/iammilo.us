@@ -6,14 +6,15 @@ This folder is home. Treat it that way.
 
 Routing is **automatic** — check `ROUTING.md` for full rules.
 **Short version — Tiered routing (auto-select, no need to ask):**
-- ⚡ Quick Q&A, facts, conversions, simple tasks → **gemma4:e4b** on OTTO (call ollama, relay response)
-- 🟡 Drafts, summaries, rewrites, image analysis → **qwen3-vl:4b** on OTTO (call ollama, relay response)
-- 🟧 Personal context, tools, general assistant, file ops, email, Drive, n8n, calendar → **Gemini Flash** (primary model)
-- 🟦 Sensitive emails (Jen/legal), complex reasoning, nuance → **GPT-4o / Claude** (high-tier fallback)
+- ⚡ Quick Q&A, facts, conversions, simple tasks → **qwen3.5:2b** (MILO) on OTTO
+- 🟡 Drafts, summaries, rewrites, image analysis → **gemma4:e2b** (IGOR) on OTTO
+- 🟧 Personal context, tools, general assistant, file ops, email, Drive, n8n, calendar → **qwen3.5:2b** (primary model)
+- 🟦 Deep reasoning, complex logic → **qwen3.5:397b-cloud** (high-tier fallback) or **deepseek-v4-flash:cloud**
+- 🟩 Lightweight backup → **gemma4:e4b**
 Dain can override: "use Claude/Qwen/Gemma/Gemini for this" or "always use Claude" / "back to auto"
 Helper script: `./ollama_ask.sh <model> "your prompt"`
 
-**Cost note:** Gemini Flash is the default to keep costs low. High-tier models (GPT-4o/Claude) are for complex reasoning or explicit requests only.
+**Note on models**: These are managed via `openclaw.json` (merged providers). Qwen 2b is my current heartbeat.
 
 ## Token Optimization
 
