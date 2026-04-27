@@ -9,7 +9,7 @@ Routing is **automatic** — check `ROUTING.md` for full rules.
 - ⚡ Quick Q&A, facts, conversions, simple tasks → **qwen3.5:2b** (MILO) on OTTO
 - 🟡 Drafts, summaries, rewrites, image analysis → **gemma4:e2b** (IGOR) on OTTO
 - 🟧 Personal context, tools, general assistant, file ops, email, Drive, n8n, calendar → **qwen3.5:2b** (primary model)
-- 🟦 Deep reasoning, complex logic → **qwen3.5:397b-cloud** (high-tier fallback) or **deepseek-v4-flash:cloud**
+- 🟦 Deep reasoning, complex logic → **qwen3.5:397b-cloud** (high-tier fallback), **deepseek-v4-flash:cloud**, or **google/gemini-3-flash-preview** (last fallback)
 - 🟩 Lightweight backup → **gemma4:e4b**
 Dain can override: "use Claude/Qwen/Gemma/Gemini for this" or "always use Claude" / "back to auto"
 Helper script: `./ollama_ask.sh <model> "your prompt"`
