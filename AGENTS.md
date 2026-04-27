@@ -6,11 +6,11 @@ This folder is home. Treat it that way.
 
 Routing is **automatic** — check `ROUTING.md` for full rules.
 **Short version — Tiered routing (auto-select, no need to ask):**
-- ⚡ Quick Q&A, facts, conversions, simple tasks → **qwen3.5:2b** (MILO) on OTTO
-- 🟡 Drafts, summaries, rewrites, image analysis → **gemma4:e2b** (IGOR) on OTTO
+- ⚡ Quick Q&A, facts, conversions, simple tasks → **qwen3.5:2b** (MILO) on OTTO (Ollama)
+- 🟡 Drafts, summaries, rewrites, image analysis → **gemma4:e2b** (IGOR) on OTTO (Ollama)
 - 🟧 Personal context, tools, general assistant, file ops, email, Drive, n8n, calendar → **qwen3.5:2b** (primary model)
 - 🟦 Deep reasoning, complex logic → **qwen3.5:397b-cloud** (primary complex reasoning), **google/gemini-3.1-flash-lite**, or **google/gemini-3-flash-preview** (last fallback)
-- 🟩 Lightweight backup → **gemma4:e4b**
+- 🟩 Lightweight backup (Local) → **gemma4:e4b** (Ollama)
 Dain can override: "use Claude/Qwen/Gemma/Gemini for this" or "always use Claude" / "back to auto"
 Helper script: `./ollama_ask.sh <model> "your prompt"`
 
