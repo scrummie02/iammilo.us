@@ -6,6 +6,7 @@
 - **Timezone:** EST (America/New_York)
 - **Location:** 22310 (Alexandria, VA area)
 - **Telegram:** @dainbentley (chat ID: 8305133249)
+- **Discord:** DCB_Tech (dcb_tech, ID: 320670848677838849) — in Guild #ai
 - **Notes:** Spun me up on a Monday night. Gave me a proper acronym name.
 
 ## Business

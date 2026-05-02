@@ -1,0 +1,95 @@
+{
+  "name": "Daily Weather & Solar Forecast (Gemma Logic)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      },
+      "id": "weather-schedule",
+      "name": "7AM Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "sendQueryParameters": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "latitude", "value": "38.7990" },
+            { "name": "longitude", "value": "-77.1066" },
+            { "name": "daily", "value": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weathercode" },
+            { "name": "current_weather", "value": "true" },
+            { "name": "timezone", "value": "America/New_York" },
+            { "name": "temperature_unit", "value": "fahrenheit" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-weather",
+      "name": "Get Weather & Sun Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"model\": \"gemma-local\", \"messages\": [ { \"role\": \"system\", \"content\": \"You are a local meteorologist. Format the following daily weather and solar data into a concise, friendly Telegram update. Use clear emojis for temperatures and sun events.\" }, { \"role\": \"user\", \"content\": \"Format this weather data for Alexandria, VA: {{ $json }}\" } ] }",
+        "options": {}
+      },
+      "id": "gemma-logic",
+      "name": "Gemma Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [440, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ZkPqW4x2n9Lp8vR1",
+          "name": "OpenAI/LiteLLM Proxy"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={ \"chat_id\": \"8305133249\", \"text\": \"{{ $json.choices[0].message.content }}\", \"parse_mode\": \"Markdown\" }",
+        "options": {}
+      },
+      "id": "send-weather",
+      "name": "Telegram Broadcast",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [660, 0]
+    }
+  ],
+  "connections": {
+    "7AM Schedule": {
+      "main": [[{ "node": "Get Weather & Sun Data", "type": "main", "index": 0 }]]
+    },
+    "Get Weather & Sun Data": {
+      "main": [[{ "node": "Gemma Analysis", "type": "main", "index": 0 }]]
+    },
+    "Gemma Analysis": {
+      "main": [[{ "node": "Telegram Broadcast", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}

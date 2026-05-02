@@ -1,0 +1,160 @@
+{
+  "updatedAt": "2026-04-08T23:10:42.387Z",
+  "createdAt": "2026-04-08T23:10:42.387Z",
+  "id": "ZUMqAYE4dMlha8h3",
+  "name": "Daily Email Connectivity Test",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 5 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "dain.bentley@protonmail.com",
+        "subject": "\u2705 Daily Email Connectivity Test",
+        "emailType": "text",
+        "message": "Hi Dain,\n\nThis is your daily automated email connectivity test.\n\nSent from: info@dainbentley.com\nTimestamp: {{ $now.toISO() }}\nWorkflow: Daily Email Connectivity Test\n\nIf you're reading this, your Gmail \u2192 ProtonMail pipeline is working.\n\n\u2014 MILO"
+      },
+      "id": "gmail-send",
+      "name": "Send Test Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        470,
+        300
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "73FQ8r7lzSZjobXf",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send Test Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "ae9f5387-6674-4d50-9618-9b56ab4b8669",
+  "activeVersionId": "ae9f5387-6674-4d50-9618-9b56ab4b8669",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-04-08T23:10:42.387Z",
+      "createdAt": "2026-04-08T23:10:42.387Z",
+      "role": "workflow:owner",
+      "workflowId": "ZUMqAYE4dMlha8h3",
+      "projectId": "5DJBfZzzizP5frZB"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-04-08T23:10:42.412Z",
+    "createdAt": "2026-04-08T23:10:42.412Z",
+    "versionId": "ae9f5387-6674-4d50-9618-9b56ab4b8669",
+    "workflowId": "ZUMqAYE4dMlha8h3",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 5 * * *"
+              }
+            ]
+          }
+        },
+        "id": "schedule-trigger",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          250,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "sendTo": "dain.bentley@protonmail.com",
+          "subject": "\u2705 Daily Email Connectivity Test",
+          "emailType": "text",
+          "message": "Hi Dain,\n\nThis is your daily automated email connectivity test.\n\nSent from: info@dainbentley.com\nTimestamp: {{ $now.toISO() }}\nWorkflow: Daily Email Connectivity Test\n\nIf you're reading this, your Gmail \u2192 ProtonMail pipeline is working.\n\n\u2014 MILO"
+        },
+        "id": "gmail-send",
+        "name": "Send Test Email",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1,
+        "position": [
+          470,
+          300
+        ],
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "73FQ8r7lzSZjobXf",
+            "name": "Gmail account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Send Test Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "DAIN BENTLEY",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}

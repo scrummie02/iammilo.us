@@ -1,0 +1,153 @@
+{
+  "updatedAt": "2026-04-13T02:29:22.335Z",
+  "createdAt": "2026-04-13T02:28:37.732Z",
+  "id": "ZZy6GTw7KpNJ1HVm",
+  "name": "Email Digest & VIP Alert",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8,12,17 * * *"
+            }
+          ]
+        }
+      },
+      "id": "503ac68c-c04b-4099-9ae4-fd5d03becc87",
+      "name": "Check Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "f6eec24b-f6b6-4dfa-83ff-6e582d467cdc",
+      "name": "Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        512,
+        -208
+      ],
+      "webhookId": "817f3633-ef93-4e56-b4a3-651627d3350a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "s8VDEOLvrZ7rCkQV",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const emails = $input.all();\nconst VIP_EMAILS = ['julie.a.siegel84@gmail.com', 'jabentley9@gmail.com'];\n\nconst categorized = { VIP: [], Business: [], Personal: [] };\n\nemails.forEach(item => {\n const email = item.json;\n const from = email.from.value || email.from;\n const subject = email.subject || '(No Subject)';\n const entry = `- *${from}*: ${subject}`;\n\n if (VIP_EMAILS.some(vip => from.toLowerCase().includes(vip))) {\n categorized.VIP.push(entry);\n } else if (from.toLowerCase().includes('dainbentley.com') || subject.toLowerCase().includes('notary')) {\n categorized.Business.push(entry);\n } else {\n categorized.Personal.push(entry);\n }\n});\n\nlet message = \"\ud83d\udcec *Email Digest*\\n\\n\";\nif (categorized.VIP.length > 0) message += \"\ud83d\udd34 *VIP (Julie/Jen)*\\n\" + categorized.VIP.join('\\n') + \"\\n\\n\";\nif (categorized.Business.length > 0) message += \"\ud83d\udcbc *Business*\\n\" + categorized.Business.join('\\n') + \"\\n\\n\";\nif (categorized.Personal.length > 0) message += \"\ud83d\udcac *Others*\\n\" + categorized.Personal.join('\\n') + \"\\n\";\nif (emails.length === 0) message = \"\ud83d\udcec No new unread emails.\";\n\nreturn [{ json: { message } }];"
+      },
+      "id": "ebd1f1a8-c65f-48d6-87fe-4b859dee4d93",
+      "name": "Classify & VIP Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "8305133249"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.message }}"
+            },
+            {
+              "name": "parse_mode",
+              "value": "Markdown"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "06e8e6e9-cf9f-4a4e-b6ee-e01187bbf594",
+      "name": "Notify Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        960,
+        -208
+      ]
+    }
+  ],
+  "connections": {
+    "Check Schedule": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Classify & VIP Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify & VIP Check": {
+      "main": [
+        [
+          {
+            "node": "Notify Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "3def1709-9dbb-4408-a7a6-9baba499eee8",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-04-13T02:28:37.732Z",
+      "createdAt": "2026-04-13T02:28:37.732Z",
+      "role": "workflow:owner",
+      "workflowId": "ZZy6GTw7KpNJ1HVm",
+      "projectId": "RKVy2puwggBotitw"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}

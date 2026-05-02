@@ -1,0 +1,118 @@
+volumes:
+  n8n_storage: null
+  postgres_storage: null
+  ollama_storage: null
+  qdrant_storage: null
+  n8n-demo-data: null 
+  n8n-shared: null
+networks:
+  ai-network: null
+  ollama-intel-arc_default:
+    external: true
+x-n8n: &a1
+  image: n8nio/n8n:latest
+  networks:
+    - ai-network
+  environment:
+    - DB_TYPE=postgresdb
+    - DB_POSTGRESDB_HOST=postgres
+    - DB_POSTGRESDB_USER=${POSTGRES_USER}
+    - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
+    - N8N_DIAGNOSTICS_ENABLED=false
+    - N8N_PERSONALIZATION_ENABLED=false
+    - N8N_ENCRYPTION_KEY
+    - N8N_USER_MANAGEMENT_JWT_SECRET
+    - OLLAMA_HOST=http://192.168.200.242:11434
+    - N8N_HOST=n8n.dainbentley.com
+    - N8N_PROTOCOL=https
+    - WEBHOOK_URL=https://n8n.dainbentley.com/
+    # This ensures the UI uses the right base
+    - N8N_EDITOR_BASE_URL=https://n8n.dainbentley.com/
+    - GENERIC_TIMEZONE=America/New_York
+    # Task Runners
+    - N8N_RUNNERS_ENABLED=true
+    - N8N_RUNNERS_MODE=external
+    - N8N_RUNNERS_BROKER_LISTEN_ADDRESS=0.0.0.0
+    - N8N_RUNNERS_AUTH_TOKEN=your-secret-here
+    - N8N_NATIVE_PYTHON_RUNNER=true
+  env_file:
+    - path: .env
+      required: true
+services:
+  postgres:
+    image: postgres:16-alpine
+    hostname: postgres
+    networks:
+      - ai-network
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    volumes:
+      - postgres_storage:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -h localhost -U ${POSTGRES_USER} -d ${POSTGRES_DB}
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  n8n-import:
+    <<: *a1
+    hostname: n8n-import
+    container_name: n8n-import
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        if [ -z "$(n8n list:workflow --onlyId)" ]; then
+          n8n import:credentials --separate --input=/demo-data/credentials && \
+          n8n import:workflow --separate --input=/demo-data/workflows
+        else
+          echo "Workflows exist, skipping import"
+        fi
+    volumes:
+      - n8n-demo-data:/demo-data
+    depends_on:
+      postgres:
+        condition: service_healthy
+  n8n:
+    <<: *a1
+    hostname: n8n
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - 5678:5678
+      - 5679:5679
+    volumes:
+      - n8n_storage:/home/node/.n8n
+      - n8n-demo-data:/demo-data
+      - n8n-shared:/data/shared
+    depends_on:
+      postgres:
+        condition: service_healthy
+      n8n-import:
+        condition: service_completed_successfully
+  task-runners:
+    image: n8nio/runners:1.111.0
+    container_name: n8n-runners
+    networks:
+      - ai-network
+    environment:
+      - N8N_RUNNERS_TASK_BROKER_URI=http://n8n:5679
+      - N8N_RUNNERS_AUTH_TOKEN=your-secret-here
+      # etc.
+    depends_on:
+      - n8n
+  qdrant:
+    image: qdrant/qdrant
+    hostname: qdrant
+    container_name: qdrant
+    networks:
+      - ai-network
+    restart: unless-stopped
+    ports:
+      - 6333:6333
+    volumes:
+      - qdrant_storage:/qdrant/storage

@@ -14,10 +14,13 @@ upload() {
   local parent="$2"
   local name=$(basename "$file")
   if [ -f "$file" ]; then
-    # Check if file exists on Drive and delete it first (overwrite)
+    # Check if file exists on Drive and replace in place (preserves ID, faster than rm + upload)
     EXISTING=$($GOG drive search "name = '$name' and '$parent' in parents" --json 2>/dev/null | python3 -c "import sys,json; files=json.load(sys.stdin).get('files',[]); print(files[0]['id'] if files else '')" 2>/dev/null)
-    [ -n "$EXISTING" ] && $GOG drive rm "$EXISTING" --force --json > /dev/null 2>&1
-    $GOG drive upload "$file" --parent "$parent" --json > /dev/null 2>&1 && UPLOADED=$((UPLOADED+1)) || ERRORS=$((ERRORS+1))
+    if [ -n "$EXISTING" ]; then
+      $GOG drive upload "$file" --replace "$EXISTING" --json > /dev/null 2>&1 && UPLOADED=$((UPLOADED+1)) || ERRORS=$((ERRORS+1))
+    else
+      $GOG drive upload "$file" --parent "$parent" --json > /dev/null 2>&1 && UPLOADED=$((UPLOADED+1)) || ERRORS=$((ERRORS+1))
+    fi
   fi
 }
 

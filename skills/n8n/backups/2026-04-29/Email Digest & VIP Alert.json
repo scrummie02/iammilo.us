@@ -1,0 +1,51 @@
+{
+"name": "Email Digest & VIP Alert",
+"type": "n8n-nodes-base.scheduleTrigger",
+"typeVersion": 1.1,
+"active": false,
+"updatedAt": "2026-04-13T02:29:22.335Z",
+"created": "2026-04-13T02:28:37.732Z",
+"id": "ZZy6GTw7KpNJ1HVm",
+"connections": {},
+"nodes": [
+{
+"name": "Check Schedule",
+"type": "n8n-nodes-base.scheduleTrigger",
+"typeVersion": 1.1,
+"position": [288, -208],
+"credentials": {}
+},
+{
+"name": "Gmail",
+"type": "n8n-nodes-base.gmail",
+"typeVersion": 2.1,
+"position": [512, -208],
+"credentials": {
+"gmailOAuth2": {
+"id": "s8VDEOLvrZ7rCkQV",
+"name": "Gmail account 2"
+}
+}
+},
+{
+"name": "Classify & VIP Check",
+"type": "n8n-nodes-base.code",
+"typeVersion": 2,
+"position": [736, -208],
+"credentials": {},
+"parameters": {}
+},
+{
+"name": "Notify Telegram",
+"type": "n8n-nodes-base.httpRequest",
+"typeVersion": 4.1,
+"position": [960, -208],
+"credentials": {}
+}
+],
+"settings": {
+"executionOrder": "v1",
+"binaryMode": "separate"
+},
+"staticData": null
+}

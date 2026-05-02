@@ -1,0 +1,42 @@
+import json
+import gzip
+
+# Read workflows from N8N
+from urllib.request import urlopen
+from urllib.error import URLError
+import json
+
+def get_workflows():
+    url = "https://n8n.dainbentley.com/api/v1/workflows"
+    try:
+        with urlopen(url, timeout=30) as response:
+            workflows = json.loads(response.read().decode())
+            return workflows
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
+
+workflows = get_workflows()
+
+# Write compressed JSON
+backup_dir = "/home/dain/.openclaw/workspace/skills/n8n/backups"
+snapshot_file = os.path.join(backup_dir, f"workflows_2026-04-29.json.gz")
+
+with gzip.open(snapshot_file, 'wt', encoding='utf-8') as f:
+    json.dump(workflows, f, indent=2)
+
+print(f"✅ Created compressed backup: {snapshot_file}")
+
+# Create individual workflow directories and files
+individual_dir = os.path.join(backup_dir, "2026-04-29")
+os.makedirs(individual_dir, exist_ok=True)
+
+for wf in workflows:
+    name = wf.get('name', f'workflow_{wf.get("id", "unknown")}')
+    safe_name = ''.join(c if c.isalnum() or c in '-_ ' else '_' for c in name)
+    fname = os.path.join(individual_dir, f"{safe_name}.json")
+    with open(fname, 'w', encoding='utf-8') as f:
+        json.dump(wf, f, indent=2)
+
+print(f"✅ Individual files created: {individual_dir}/")
+print(f"   Total: {len(workflows)} workflows")

@@ -1,0 +1,885 @@
+{
+  "updatedAt": "2026-03-09T13:22:50.259Z",
+  "createdAt": "2026-03-09T13:22:50.259Z",
+  "id": "HUcwxsrczOc92n2d",
+  "name": "Morning News Digest - Webhook Run",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "path": "temp-news-digest",
+        "options": {}
+      }
+    },
+    {
+      "id": "rss-ap-world",
+      "name": "AP World RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        220,
+        -400
+      ],
+      "parameters": {
+        "url": "https://feeds.apnews.com/rss/apf-topnews"
+      }
+    },
+    {
+      "id": "rss-ap-sci",
+      "name": "AP Science RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        220,
+        -200
+      ],
+      "parameters": {
+        "url": "https://feeds.apnews.com/rss/apf-science"
+      }
+    },
+    {
+      "id": "rss-ars",
+      "name": "Ars Technica RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "url": "https://feeds.arstechnica.com/arstechnica/index"
+      }
+    },
+    {
+      "id": "rss-bbc",
+      "name": "BBC Science RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        220,
+        200
+      ],
+      "parameters": {
+        "url": "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml"
+      }
+    },
+    {
+      "id": "reddit-nova",
+      "name": "Reddit r/nova",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        420
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://www.reddit.com/r/nova/hot.json?limit=3",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "MiloNewsBot/1.0"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "reddit-worldnews",
+      "name": "Reddit r/worldnews",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        560
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://www.reddit.com/r/worldnews/hot.json?limit=3",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "MiloNewsBot/1.0"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "reddit-conservative",
+      "name": "Reddit r/conservative",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        700
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://www.reddit.com/r/conservative/hot.json?limit=3",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "MiloNewsBot/1.0"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "reddit-politics",
+      "name": "Reddit r/politics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        840
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://www.reddit.com/r/politics/hot.json?limit=3",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "MiloNewsBot/1.0"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "reddit-linux",
+      "name": "Reddit r/linux",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        980
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://www.reddit.com/r/linux/hot.json?limit=3",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "MiloNewsBot/1.0"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "reddit-fednews",
+      "name": "Reddit r/fednews",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        1120
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://www.reddit.com/r/fednews/hot.json?limit=3",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "MiloNewsBot/1.0"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "format",
+      "name": "Format Digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        360
+      ],
+      "parameters": {
+        "jsCode": "const today = new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});\n\nfunction getTop(nodeId, label, n) {\n  try {\n    const items = $(nodeId).all();\n    return items.slice(0, n).map(i => ({\n      title: (i.json.title || '').replace(/[*[\\]]/g, '').trim(),\n      link: i.json.link || ''\n    }));\n  } catch(e) { return []; }\n}\n\nfunction getRedditTop(nodeId, sub) {\n  try {\n    const data = $(nodeId).first().json;\n    const posts = data?.data?.children || [];\n    const p = posts.find(c => !c.data.stickied)?.data;\n    if (!p) return null;\n    return {\n      title: (p.title || '').replace(/[*[\\]]/g, '').slice(0, 90),\n      link: 'https://reddit.com' + p.permalink\n    };\n  } catch(e) { return null; }\n}\n\nlet msg = '\\u{1F4F0} *News Briefing \\u2014 ' + today + '*\\n\\n';\n\n// World\nconst world = getTop('AP World RSS', '', 3);\nif (world.length) {\n  msg += '\\u{1F30D} *World* (AP News)\\n';\n  for (const p of world) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\n// Tech\nconst tech = getTop('Ars Technica RSS', '', 3);\nif (tech.length) {\n  msg += '\\u{1F4BB} *Tech* (Ars Technica)\\n';\n  for (const p of tech) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\n// Science (AP + BBC combined)\nconst sciAP = getTop('AP Science RSS', '', 2);\nconst sciBBC = getTop('BBC Science RSS', '', 2);\nconst sci = [...sciAP, ...sciBBC].slice(0, 3);\nif (sci.length) {\n  msg += '\\u{1F52C} *Science*\\n';\n  for (const p of sci) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\n// Reddit\nconst redditSubs = [\n  ['Reddit r/nova', 'nova'],\n  ['Reddit r/worldnews', 'worldnews'],\n  ['Reddit r/conservative', 'conservative'],\n  ['Reddit r/politics', 'politics'],\n  ['Reddit r/linux', 'linux'],\n  ['Reddit r/fednews', 'fednews'],\n];\nconst redditPosts = redditSubs.map(([nid, sub]) => ({ sub, post: getRedditTop(nid, sub) })).filter(x => x.post);\nif (redditPosts.length) {\n  msg += '\\u{1F47E} *Reddit Highlights*\\n';\n  for (const {sub, post} of redditPosts) {\n    msg += `r/${sub} \\u2014 [${post.title}](${post.link})\\n`;\n  }\n}\n\nreturn [{ json: { message: msg.trim() } }];"
+      }
+    },
+    {
+      "id": "send",
+      "name": "Send to Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        760,
+        360
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={ \"chat_id\": \"8305133249\", \"text\": {{ JSON.stringify($json.message) }}, \"parse_mode\": \"Markdown\" }",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AP World RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AP Science RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Ars Technica RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "BBC Science RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reddit r/nova",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reddit r/worldnews",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reddit r/conservative",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reddit r/politics",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reddit r/linux",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reddit r/fednews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AP World RSS": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AP Science RSS": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ars Technica RSS": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BBC Science RSS": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reddit r/nova": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reddit r/worldnews": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reddit r/conservative": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reddit r/politics": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reddit r/linux": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reddit r/fednews": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Digest": {
+      "main": [
+        [
+          {
+            "node": "Send to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "0b7fd743-4a13-4205-91a0-0ada1c4532cf",
+  "activeVersionId": "0b7fd743-4a13-4205-91a0-0ada1c4532cf",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-03-09T13:22:50.259Z",
+      "createdAt": "2026-03-09T13:22:50.259Z",
+      "role": "workflow:owner",
+      "workflowId": "HUcwxsrczOc92n2d",
+      "projectId": "5DJBfZzzizP5frZB"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-03-09T13:22:50.288Z",
+    "createdAt": "2026-03-09T13:22:50.288Z",
+    "versionId": "0b7fd743-4a13-4205-91a0-0ada1c4532cf",
+    "workflowId": "HUcwxsrczOc92n2d",
+    "nodes": [
+      {
+        "id": "webhook-trigger",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "path": "temp-news-digest",
+          "options": {}
+        }
+      },
+      {
+        "id": "rss-ap-world",
+        "name": "AP World RSS",
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1,
+        "position": [
+          220,
+          -400
+        ],
+        "parameters": {
+          "url": "https://feeds.apnews.com/rss/apf-topnews"
+        }
+      },
+      {
+        "id": "rss-ap-sci",
+        "name": "AP Science RSS",
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1,
+        "position": [
+          220,
+          -200
+        ],
+        "parameters": {
+          "url": "https://feeds.apnews.com/rss/apf-science"
+        }
+      },
+      {
+        "id": "rss-ars",
+        "name": "Ars Technica RSS",
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1,
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "url": "https://feeds.arstechnica.com/arstechnica/index"
+        }
+      },
+      {
+        "id": "rss-bbc",
+        "name": "BBC Science RSS",
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1,
+        "position": [
+          220,
+          200
+        ],
+        "parameters": {
+          "url": "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml"
+        }
+      },
+      {
+        "id": "reddit-nova",
+        "name": "Reddit r/nova",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          220,
+          420
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://www.reddit.com/r/nova/hot.json?limit=3",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "MiloNewsBot/1.0"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "reddit-worldnews",
+        "name": "Reddit r/worldnews",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          220,
+          560
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://www.reddit.com/r/worldnews/hot.json?limit=3",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "MiloNewsBot/1.0"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "reddit-conservative",
+        "name": "Reddit r/conservative",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          220,
+          700
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://www.reddit.com/r/conservative/hot.json?limit=3",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "MiloNewsBot/1.0"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "reddit-politics",
+        "name": "Reddit r/politics",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          220,
+          840
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://www.reddit.com/r/politics/hot.json?limit=3",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "MiloNewsBot/1.0"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "reddit-linux",
+        "name": "Reddit r/linux",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          220,
+          980
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://www.reddit.com/r/linux/hot.json?limit=3",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "MiloNewsBot/1.0"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "reddit-fednews",
+        "name": "Reddit r/fednews",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          220,
+          1120
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://www.reddit.com/r/fednews/hot.json?limit=3",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "MiloNewsBot/1.0"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "format",
+        "name": "Format Digest",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          520,
+          360
+        ],
+        "parameters": {
+          "jsCode": "const today = new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});\n\nfunction getTop(nodeId, label, n) {\n  try {\n    const items = $(nodeId).all();\n    return items.slice(0, n).map(i => ({\n      title: (i.json.title || '').replace(/[*[\\]]/g, '').trim(),\n      link: i.json.link || ''\n    }));\n  } catch(e) { return []; }\n}\n\nfunction getRedditTop(nodeId, sub) {\n  try {\n    const data = $(nodeId).first().json;\n    const posts = data?.data?.children || [];\n    const p = posts.find(c => !c.data.stickied)?.data;\n    if (!p) return null;\n    return {\n      title: (p.title || '').replace(/[*[\\]]/g, '').slice(0, 90),\n      link: 'https://reddit.com' + p.permalink\n    };\n  } catch(e) { return null; }\n}\n\nlet msg = '\\u{1F4F0} *News Briefing \\u2014 ' + today + '*\\n\\n';\n\n// World\nconst world = getTop('AP World RSS', '', 3);\nif (world.length) {\n  msg += '\\u{1F30D} *World* (AP News)\\n';\n  for (const p of world) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\n// Tech\nconst tech = getTop('Ars Technica RSS', '', 3);\nif (tech.length) {\n  msg += '\\u{1F4BB} *Tech* (Ars Technica)\\n';\n  for (const p of tech) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\n// Science (AP + BBC combined)\nconst sciAP = getTop('AP Science RSS', '', 2);\nconst sciBBC = getTop('BBC Science RSS', '', 2);\nconst sci = [...sciAP, ...sciBBC].slice(0, 3);\nif (sci.length) {\n  msg += '\\u{1F52C} *Science*\\n';\n  for (const p of sci) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\n// Reddit\nconst redditSubs = [\n  ['Reddit r/nova', 'nova'],\n  ['Reddit r/worldnews', 'worldnews'],\n  ['Reddit r/conservative', 'conservative'],\n  ['Reddit r/politics', 'politics'],\n  ['Reddit r/linux', 'linux'],\n  ['Reddit r/fednews', 'fednews'],\n];\nconst redditPosts = redditSubs.map(([nid, sub]) => ({ sub, post: getRedditTop(nid, sub) })).filter(x => x.post);\nif (redditPosts.length) {\n  msg += '\\u{1F47E} *Reddit Highlights*\\n';\n  for (const {sub, post} of redditPosts) {\n    msg += `r/${sub} \\u2014 [${post.title}](${post.link})\\n`;\n  }\n}\n\nreturn [{ json: { message: msg.trim() } }];"
+        }
+      },
+      {
+        "id": "send",
+        "name": "Send to Telegram",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          760,
+          360
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={ \"chat_id\": \"8305133249\", \"text\": {{ JSON.stringify($json.message) }}, \"parse_mode\": \"Markdown\" }",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "AP World RSS",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "AP Science RSS",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Ars Technica RSS",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "BBC Science RSS",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Reddit r/nova",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Reddit r/worldnews",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Reddit r/conservative",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Reddit r/politics",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Reddit r/linux",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Reddit r/fednews",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AP World RSS": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AP Science RSS": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ars Technica RSS": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "BBC Science RSS": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Reddit r/nova": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Reddit r/worldnews": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Reddit r/conservative": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Reddit r/politics": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Reddit r/linux": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Reddit r/fednews": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Digest": {
+        "main": [
+          [
+            {
+              "node": "Send to Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "DAIN BENTLEY",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}

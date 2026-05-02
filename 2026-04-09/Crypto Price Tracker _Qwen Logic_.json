@@ -1,0 +1,163 @@
+{
+  "updatedAt": "2026-04-08T20:40:46.999Z",
+  "createdAt": "2026-04-08T20:40:46.999Z",
+  "id": "taC0ZEyjRYdm9Nq1",
+  "name": "Crypto Price Tracker (Qwen Logic)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9,17 * * *"
+            }
+          ]
+        }
+      },
+      "id": "e6f8f4a1-8d2b-4c5e-9f3a-7d1c5e9f8a2b",
+      "name": "9AM & 5PM Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.coingecko.com/api/v3/simple/price",
+        "sendQueryParameters": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ids",
+              "value": "bitcoin,ripple,ethereum"
+            },
+            {
+              "name": "vs_currencies",
+              "value": "usd"
+            },
+            {
+              "name": "include_24hr_change",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a2b3c4d5-e6f7-4a8b-9c0d-1e2f3a4b5c6d",
+      "name": "Fetch Crypto Prices",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"model\": \"qwen-plus\", \"messages\": [ { \"role\": \"system\", \"content\": \"You are a financial analyst. Format crypto price data into a concise, professional Telegram update with emojis. Highlight significant 24h shifts.\" }, { \"role\": \"user\", \"content\": \"Format this data: {{ $json }}\" } ] }",
+        "options": {}
+      },
+      "id": "c7d8e9f0-a1b2-4c3d-4e5f-6g7h8i9j0k1l",
+      "name": "Qwen Analysis Logic",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        440,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ZkPqW4x2n9Lp8vR1",
+          "name": "OpenAI/LiteLLM Proxy"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={ \"chat_id\": \"8305133249\", \"text\": \"{{ $json.choices[0].message.content }}\", \"parse_mode\": \"Markdown\" }",
+        "options": {}
+      },
+      "id": "b1c2d3e4-f5g6-7h8i-9j0k-1l2m3n4o5p6q",
+      "name": "Send to Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        660,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "9AM & 5PM Schedule": {
+      "main": [
+        [
+          {
+            "node": "Fetch Crypto Prices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Crypto Prices": {
+      "main": [
+        [
+          {
+            "node": "Qwen Analysis Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qwen Analysis Logic": {
+      "main": [
+        [
+          {
+            "node": "Send to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "8da5d837-a177-4ed8-b43e-85ba4ba65bbf",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-04-08T20:40:46.999Z",
+      "createdAt": "2026-04-08T20:40:46.999Z",
+      "role": "workflow:owner",
+      "workflowId": "taC0ZEyjRYdm9Nq1",
+      "projectId": "5DJBfZzzizP5frZB"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}

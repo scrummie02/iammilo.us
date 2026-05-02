@@ -1,0 +1,379 @@
+{
+  "updatedAt": "2026-03-17T12:26:12.387Z",
+  "createdAt": "2026-03-10T13:12:02.507Z",
+  "id": "s8KeUS9yfSu2SDHV",
+  "name": "Email Digest - Morning",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "schedule",
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "gmail",
+      "name": "Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        200,
+        0
+      ],
+      "parameters": {
+        "operation": "getAll",
+        "limit": 50,
+        "simple": true,
+        "filters": {
+          "q": "in:inbox newer_than:1d"
+        }
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "73FQ8r7lzSZjobXf",
+          "name": "Gmail account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "prepare-prompt",
+      "name": "Prepare Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ],
+      "parameters": {
+        "jsCode": "\nlet emails = $input.all().map((e, index) => {\n  // Defensive extraction\n  let from = e.json.from || e.json.From || e.json.sender || \"Unknown\";\n  let subject = e.json.subject || e.json.Subject || \"No Subject\";\n  let snippet = e.json.snippet || e.json.Snippet || \"\";\n  \n  // If it's a raw structure (headers array)\n  if (from === \"Unknown\" && Array.isArray(e.json.payload?.headers)) {\n    let fromHeader = e.json.payload.headers.find(h => h.name.toLowerCase() === 'from');\n    let subjectHeader = e.json.payload.headers.find(h => h.name.toLowerCase() === 'subject');\n    if (fromHeader) from = fromHeader.value;\n    if (subjectHeader) subject = subjectHeader.value;\n  }\n  \n  return `From: ${from}\\nSubject: ${subject}\\nSnippet: ${snippet}`;\n}).join('\\n\\n---\\n\\n');\n\nif (!emails || emails.trim() === \"\") {\n  emails = \"No emails found.\";\n}\n\nlet prompt = `You are an email assistant. Summarize the following inbox emails into a digest.\n\nCLASSIFY ONLY the emails provided below. Do not invent emails. If \"No emails found.\", just output \"\ud83d\udcec Inbox clear \u2705\"\n\n\ud83d\udd34 VIP \u2014 julie.a.siegel84@gmail.com or jabentley9@gmail.com ONLY\n\ud83d\udea8 IMPORTANT \u2014 VA, DOJ, IRS, OPM, court, banks, Charlotte school, medical, financial\n\ud83d\udfe1 MEDIUM \u2014 bills, subscriptions, receipts, newsletters\n\ud83d\uddd1\ufe0f SPAM \u2014 marketing, promotions, job alerts\n\nFormat EXACTLY like this (use Markdown). CRITICAL: KEEP THE ENTIRE RESPONSE CONCISE AND STRICTLY UNDER 3500 CHARACTERS TOTAL. If there are many medium/spam emails, truncate the list:\n\n\ud83d\udcec *Email Digest*\n\n\ud83d\udd34 *VIP*\n\u2022 [From] \u2014 [Subject] \u2014 [1-line summary]\n(or None.)\n\n\ud83d\udea8 *Urgent / Important*\n\u2022 [From] \u2014 [Subject] \u2014 [1-line summary]\n(or None.)\n\n\ud83d\udfe1 *Medium*\n\u2022 [From] \u2014 [Subject]\n(or None.)\n\n\ud83d\uddd1\ufe0f *Likely Spam*\n\u2022 [Comma separated senders]\n(or None.)\n\nEmails to classify:\n${emails}`;\n\nreturn [{ json: { prompt: prompt } }];\n"
+      }
+    },
+    {
+      "id": "ask-gemini",
+      "name": "Ask Gemini Pro",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=AIzaSyAnnVmRDJTCRGKBvM80tEGpKmBa-f0CFpY",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ contents: [{ parts: [{ text: $json.prompt }] }] }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "format-message",
+      "name": "Format Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const text = $input.first().json.candidates?.[0]?.content?.parts?.[0]?.text || 'Error generating digest.';\nreturn [{ json: { message: text.trim() + '\\n\\n*(via n8n & Gemini Pro)*' } }];"
+      }
+    },
+    {
+      "id": "send-telegram",
+      "name": "Send to Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1000,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={ \"chat_id\": \"8305133249\", \"text\": {{ JSON.stringify($json.message) }} }",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Schedule": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Prepare Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Prompt": {
+      "main": [
+        [
+          {
+            "node": "Ask Gemini Pro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask Gemini Pro": {
+      "main": [
+        [
+          {
+            "node": "Format Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Message": {
+      "main": [
+        [
+          {
+            "node": "Send to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "dc18ef60-d28f-4556-96fb-69a24ed34564",
+  "activeVersionId": "dc18ef60-d28f-4556-96fb-69a24ed34564",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-03-10T13:12:02.507Z",
+      "createdAt": "2026-03-10T13:12:02.507Z",
+      "role": "workflow:owner",
+      "workflowId": "s8KeUS9yfSu2SDHV",
+      "projectId": "5DJBfZzzizP5frZB"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-03-17T12:26:12.390Z",
+    "createdAt": "2026-03-17T12:26:12.390Z",
+    "versionId": "dc18ef60-d28f-4556-96fb-69a24ed34564",
+    "workflowId": "s8KeUS9yfSu2SDHV",
+    "nodes": [
+      {
+        "id": "schedule",
+        "name": "Schedule",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 7 * * *"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "gmail",
+        "name": "Gmail",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1,
+        "position": [
+          200,
+          0
+        ],
+        "parameters": {
+          "operation": "getAll",
+          "limit": 50,
+          "simple": true,
+          "filters": {
+            "q": "in:inbox newer_than:1d"
+          }
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "73FQ8r7lzSZjobXf",
+            "name": "Gmail account"
+          }
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "id": "prepare-prompt",
+        "name": "Prepare Prompt",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          400,
+          0
+        ],
+        "parameters": {
+          "jsCode": "\nlet emails = $input.all().map((e, index) => {\n  // Defensive extraction\n  let from = e.json.from || e.json.From || e.json.sender || \"Unknown\";\n  let subject = e.json.subject || e.json.Subject || \"No Subject\";\n  let snippet = e.json.snippet || e.json.Snippet || \"\";\n  \n  // If it's a raw structure (headers array)\n  if (from === \"Unknown\" && Array.isArray(e.json.payload?.headers)) {\n    let fromHeader = e.json.payload.headers.find(h => h.name.toLowerCase() === 'from');\n    let subjectHeader = e.json.payload.headers.find(h => h.name.toLowerCase() === 'subject');\n    if (fromHeader) from = fromHeader.value;\n    if (subjectHeader) subject = subjectHeader.value;\n  }\n  \n  return `From: ${from}\\nSubject: ${subject}\\nSnippet: ${snippet}`;\n}).join('\\n\\n---\\n\\n');\n\nif (!emails || emails.trim() === \"\") {\n  emails = \"No emails found.\";\n}\n\nlet prompt = `You are an email assistant. Summarize the following inbox emails into a digest.\n\nCLASSIFY ONLY the emails provided below. Do not invent emails. If \"No emails found.\", just output \"\ud83d\udcec Inbox clear \u2705\"\n\n\ud83d\udd34 VIP \u2014 julie.a.siegel84@gmail.com or jabentley9@gmail.com ONLY\n\ud83d\udea8 IMPORTANT \u2014 VA, DOJ, IRS, OPM, court, banks, Charlotte school, medical, financial\n\ud83d\udfe1 MEDIUM \u2014 bills, subscriptions, receipts, newsletters\n\ud83d\uddd1\ufe0f SPAM \u2014 marketing, promotions, job alerts\n\nFormat EXACTLY like this (use Markdown). CRITICAL: KEEP THE ENTIRE RESPONSE CONCISE AND STRICTLY UNDER 3500 CHARACTERS TOTAL. If there are many medium/spam emails, truncate the list:\n\n\ud83d\udcec *Email Digest*\n\n\ud83d\udd34 *VIP*\n\u2022 [From] \u2014 [Subject] \u2014 [1-line summary]\n(or None.)\n\n\ud83d\udea8 *Urgent / Important*\n\u2022 [From] \u2014 [Subject] \u2014 [1-line summary]\n(or None.)\n\n\ud83d\udfe1 *Medium*\n\u2022 [From] \u2014 [Subject]\n(or None.)\n\n\ud83d\uddd1\ufe0f *Likely Spam*\n\u2022 [Comma separated senders]\n(or None.)\n\nEmails to classify:\n${emails}`;\n\nreturn [{ json: { prompt: prompt } }];\n"
+        }
+      },
+      {
+        "id": "ask-gemini",
+        "name": "Ask Gemini Pro",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          600,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=AIzaSyAnnVmRDJTCRGKBvM80tEGpKmBa-f0CFpY",
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={{ JSON.stringify({ contents: [{ parts: [{ text: $json.prompt }] }] }) }}",
+          "options": {}
+        }
+      },
+      {
+        "id": "format-message",
+        "name": "Format Message",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          800,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const text = $input.first().json.candidates?.[0]?.content?.parts?.[0]?.text || 'Error generating digest.';\nreturn [{ json: { message: text.trim() + '\\n\\n*(via n8n & Gemini Pro)*' } }];"
+        }
+      },
+      {
+        "id": "send-telegram",
+        "name": "Send to Telegram",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1000,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={ \"chat_id\": \"8305133249\", \"text\": {{ JSON.stringify($json.message) }} }",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Schedule": {
+        "main": [
+          [
+            {
+              "node": "Gmail",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Gmail": {
+        "main": [
+          [
+            {
+              "node": "Prepare Prompt",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Prompt": {
+        "main": [
+          [
+            {
+              "node": "Ask Gemini Pro",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ask Gemini Pro": {
+        "main": [
+          [
+            {
+              "node": "Format Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Message": {
+        "main": [
+          [
+            {
+              "node": "Send to Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "DAIN BENTLEY",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}

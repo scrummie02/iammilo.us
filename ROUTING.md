@@ -10,6 +10,7 @@ Dain can override at any time by saying "use Claude", "use Qwen", "use Gemma", e
 
 | Model | Where | How to call | Best for |
 |---|---|---|---|
+| **kimi-k2.6:cloud** | OTTO (192.168.200.241) | `./ollama_ask.sh kimi-k2.6:cloud` | Nuanced drafting, sensitive communications, emotional tone |
 | **gemma4:e4b** | OTTO (192.168.200.241) | `./ollama_ask.sh gemma4:e4b` | Fast Q&A, conversions, trivia, simple tasks |
 | **qwen3-vl:4b** | OTTO (192.168.200.241) | `./ollama_ask.sh qwen3-vl:4b` | Drafts, summaries, rewrites, image analysis |
 | **Gemini Flash** | Native (default session) | Default | Tools, personal context, general assistant |
@@ -46,6 +47,15 @@ Handle directly as the default model. Always use Gemini for:
 - Professional documents (resume, cover letters, performance reviews)
 - Heavy reading, document analysis, and large context windows
 
+### 🟨 Tier 3.5 → kimi-k2.6:cloud (~30-60 sec, OTTO, free)
+Call `./ollama_ask.sh kimi-k2.6:cloud` and relay the response. Use when:
+- Drafting sensitive or emotionally nuanced communications
+- Email responses requiring careful tone (e.g., jabentley9@gmail.com)
+- Situations requiring de-escalation or diplomatic language
+- Complex interpersonal messaging where tone is critical
+
+**Note:** When drafting emails to jabentley9@gmail.com, always route through Kimi for tone calibration. Show Dain the draft on Telegram before sending.
+
 ### 🟦 Tier 4 → Claude Sonnet (coding / nuanced logic)
 Call via `/model anthropic/claude-sonnet-4-6` or ask me to switch. Use Claude exclusively for:
 - **ALL intense coding and programming** — building new apps, deep debugging, complex architecture
@@ -66,6 +76,7 @@ Format: `*(via <model>)*` at the end of the response.
 
 | Dain says | MILO does |
 |---|---|
+| "use Kimi" | Route to kimi-k2.6:cloud |
 | "use Claude for this" | Route current task to Claude |
 | "use Qwen" | Route to qwen3-vl:4b |
 | "use Gemma" | Route to gemma4:e4b |
@@ -87,5 +98,4 @@ Format: `*(via <model>)*` at the end of the response.
 ## Notes
 - Ollama endpoint: OTTO at http://192.168.200.241:11434
 - All local inference stays on-machine (private, no API cost)
-- IGOR (GMKtec Ultra 9, 96GB DDR5) — planned for Qwen3.5-27B-Claude-distilled; not yet online
 - When IGOR comes online, update endpoint and add the 27B model as a new Tier 2/3

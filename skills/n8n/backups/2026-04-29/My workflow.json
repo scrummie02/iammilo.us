@@ -1,0 +1,42 @@
+{
+"name": "My workflow",
+"type": "n8n-nodes-base.gmailTrigger",
+"typeVersion": 1.2,
+"active": false,
+"updatedAt": "2026-04-13T02:37:36.352Z",
+"created": "2026-04-13T02:21:05.868Z",
+"id": "ljIVkK2tuvf0xMy5",
+"connections": {},
+"nodes": [
+{
+"name": "Gmail Trigger",
+"type": "n8n-nodes-base.gmailTrigger",
+"typeVersion": 1.2,
+"position": [-1120, 608],
+"credentials": {
+"gmailOAuth2": {
+"id": "eoLUGfEZSeV39pjE",
+"name": "Gmail account"
+}
+}
+},
+{
+"name": "Wait",
+"type": "n8n-nodes-base.wait",
+"typeVersion": 1.1,
+"position": [-992, 608],
+"credentials": {},
+"parameters": {
+"amount": 1
+}
+},
+{
+"name": "Gmail labelling agent",
+"type": "@n8n/n8n-nodes-langchain.agent",
+"typeVersion": 1.7,
+"position": [-832, 608],
+"credentials": {},
+"parameters": {}
+}
+]
+}

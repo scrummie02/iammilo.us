@@ -1,0 +1,113 @@
+{
+  "name": "Email Digest & VIP Alert",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8,12,17 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Check Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "filters": {
+          "q": "is:unread -from:me"
+        }
+      },
+      "id": "fetch-emails",
+      "name": "Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [220, 0],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "eoLUGfEZSeV39pjE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const emails = $input.all();\nconst VIP_EMAILS = ['julie.a.siegel84@gmail.com', 'jabentley9@gmail.com'];\n\nconst categorized = {\n  VIP: [],\n  Business: [],\n  Personal: [],\n  Other: []\n};\n\nemails.forEach(item => {\n  const email = item.json;\n  const from = email.from.value || email.from;\n  const subject = email.subject || '(No Subject)';\n  \n  const entry = `- *${from}*: ${subject}`;\n\n  if (VIP_EMAILS.some(vip => from.toLowerCase().includes(vip))) {\n    categorized.VIP.push(entry);\n  } else if (from.toLowerCase().includes('dainbentley.com') || subject.toLowerCase().includes('notary')) {\n    categorized.Business.push(entry);\n  } else {\n    categorized.Personal.push(entry);\n  }\n});\n\nlet message = \"\ud83d\udce9 *Email Digest*\\n\\n\";\n\nif (categorized.VIP.length > 0) {\n  message += \"\ud83d\udd34 *VIP (Julie/Jen)*\\n\" + categorized.VIP.join('\\n') + \"\\n\\n\";\n}\n\nif (categorized.Business.length > 0) {\n  message += \"\ud83d\udcbc *Business*\\n\" + categorized.Business.join('\\n') + \"\\n\\n\";\n}\n\nif (categorized.Personal.length > 0) {\n  message += \"\ud83d\udcac *Others*\\n\" + categorized.Personal.join('\\n') + \"\\n\";\n}\n\nif (emails.length === 0) {\n  message = \"\ud83d\udce9 No new unread emails.\";\n}\n\nreturn [{ json: { message, count: emails.length } }];"
+      },
+      "id": "classify-emails",
+      "name": "Classify & VIP Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "8305133249"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.message }}"
+            },
+            {
+              "name": "parse_mode",
+              "value": "Markdown"
+            }
+          ]
+        }
+      },
+      "id": "telegram-digest",
+      "name": "Notify Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [660, 0]
+    }
+  ],
+  "connections": {
+    "Check Schedule": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Classify & VIP Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify & VIP Check": {
+      "main": [
+        [
+          {
+            "node": "Notify Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

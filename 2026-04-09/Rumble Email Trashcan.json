@@ -1,0 +1,315 @@
+{
+  "updatedAt": "2026-03-14T20:20:31.537Z",
+  "createdAt": "2026-03-14T20:20:25.669Z",
+  "id": "K0OuNSXai0OVBohx",
+  "name": "Rumble Email Trashcan",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "539d927b-7ae6-4391-860d-216c37aa4f0a"
+    },
+    {
+      "name": "Find Rumble Emails",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "operation": "getAll",
+        "limit": 50,
+        "simple": true,
+        "filters": {
+          "q": "from:rumble.com in:inbox"
+        }
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "73FQ8r7lzSZjobXf",
+          "name": "Gmail account"
+        }
+      },
+      "alwaysOutputData": true,
+      "continueOnFail": true,
+      "id": "752ba86b-272e-44f5-95e6-5d490aa1c988"
+    },
+    {
+      "name": "Has Emails?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-id",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "73f88f11-bbe4-4780-bbae-863a85090394"
+    },
+    {
+      "name": "Trash Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        660,
+        -80
+      ],
+      "parameters": {
+        "operation": "trash",
+        "messageId": "={{ $json.id }}"
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "73FQ8r7lzSZjobXf",
+          "name": "Gmail account"
+        }
+      },
+      "continueOnFail": true,
+      "id": "614d6691-b501-4dfb-a79d-df27663128e8"
+    }
+  ],
+  "connections": {
+    "Schedule": {
+      "main": [
+        [
+          {
+            "node": "Find Rumble Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Rumble Emails": {
+      "main": [
+        [
+          {
+            "node": "Has Emails?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Emails?": {
+      "main": [
+        [
+          {
+            "node": "Trash Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "376862cf-b221-4458-80f8-3a56243e918d",
+  "activeVersionId": "376862cf-b221-4458-80f8-3a56243e918d",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-03-14T20:20:25.669Z",
+      "createdAt": "2026-03-14T20:20:25.669Z",
+      "role": "workflow:owner",
+      "workflowId": "K0OuNSXai0OVBohx",
+      "projectId": "5DJBfZzzizP5frZB"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-03-14T20:20:25.696Z",
+    "createdAt": "2026-03-14T20:20:25.696Z",
+    "versionId": "376862cf-b221-4458-80f8-3a56243e918d",
+    "workflowId": "K0OuNSXai0OVBohx",
+    "nodes": [
+      {
+        "name": "Schedule",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 30
+              }
+            ]
+          }
+        },
+        "id": "539d927b-7ae6-4391-860d-216c37aa4f0a"
+      },
+      {
+        "name": "Find Rumble Emails",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1,
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "operation": "getAll",
+          "limit": 50,
+          "simple": true,
+          "filters": {
+            "q": "from:rumble.com in:inbox"
+          }
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "73FQ8r7lzSZjobXf",
+            "name": "Gmail account"
+          }
+        },
+        "alwaysOutputData": true,
+        "continueOnFail": true,
+        "id": "752ba86b-272e-44f5-95e6-5d490aa1c988"
+      },
+      {
+        "name": "Has Emails?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "check-id",
+                "leftValue": "={{ $json.id }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        },
+        "id": "73f88f11-bbe4-4780-bbae-863a85090394"
+      },
+      {
+        "name": "Trash Email",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1,
+        "position": [
+          660,
+          -80
+        ],
+        "parameters": {
+          "operation": "trash",
+          "messageId": "={{ $json.id }}"
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "73FQ8r7lzSZjobXf",
+            "name": "Gmail account"
+          }
+        },
+        "continueOnFail": true,
+        "id": "614d6691-b501-4dfb-a79d-df27663128e8"
+      }
+    ],
+    "connections": {
+      "Schedule": {
+        "main": [
+          [
+            {
+              "node": "Find Rumble Emails",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find Rumble Emails": {
+        "main": [
+          [
+            {
+              "node": "Has Emails?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Has Emails?": {
+        "main": [
+          [
+            {
+              "node": "Trash Email",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      }
+    },
+    "authors": "DAIN BENTLEY",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}

@@ -1,0 +1,259 @@
+{
+  "updatedAt": "2026-04-03T05:24:13.411Z",
+  "createdAt": "2026-03-10T11:13:45.001Z",
+  "id": "BwdXaFT5pHhgwmTj",
+  "name": "Morning Commute Traffic",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "schedule-commute",
+      "name": "Schedule 6:45 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "45 6 * * 1-5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ask-gemini-traffic",
+      "name": "Ask Gemini Pro",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAnnVmRDJTCRGKBvM80tEGpKmBa-f0CFpY",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "{\"contents\": [{\"parts\": [{\"text\": \"Generate a morning commute traffic report for Dain driving from 6206 Redins Drive, Alexandria VA to St Thomas More Cathedral School, Arlington VA. Assume current time is ~6:45 AM EST on a weekday. Estimate the drive time based on typical I-395 N morning rush hour traffic. Mention the route (I-395 N). Keep it concise, helpful, and nicely formatted with emojis.\"}]}]}",
+        "options": {}
+      }
+    },
+    {
+      "id": "format-traffic-msg",
+      "name": "Format Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const text = $input.first().json.candidates?.[0]?.content?.parts?.[0]?.text || 'Traffic report unavailable.';\nreturn [{ json: { message: '\ud83d\ude97 *Morning Commute Update*\\n\\n' + text.trim() + '\\n\\n*(via n8n & Gemini Pro)*' } }];"
+      }
+    },
+    {
+      "id": "send-telegram-traffic",
+      "name": "Send to Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={ \"chat_id\": \"8305133249\", \"text\": {{ JSON.stringify($json.message) }} }",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Schedule 6:45 AM": {
+      "main": [
+        [
+          {
+            "node": "Ask Gemini Pro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask Gemini Pro": {
+      "main": [
+        [
+          {
+            "node": "Format Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Message": {
+      "main": [
+        [
+          {
+            "node": "Send to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule 6:45 AM": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": {},
+  "versionId": "af320e36-7f9a-458b-972e-8bd680accd39",
+  "activeVersionId": "af320e36-7f9a-458b-972e-8bd680accd39",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-03-10T11:13:45.001Z",
+      "createdAt": "2026-03-10T11:13:45.001Z",
+      "role": "workflow:owner",
+      "workflowId": "BwdXaFT5pHhgwmTj",
+      "projectId": "5DJBfZzzizP5frZB"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-04-03T05:24:13.412Z",
+    "createdAt": "2026-04-03T05:24:13.412Z",
+    "versionId": "af320e36-7f9a-458b-972e-8bd680accd39",
+    "workflowId": "BwdXaFT5pHhgwmTj",
+    "nodes": [
+      {
+        "id": "schedule-commute",
+        "name": "Schedule 6:45 AM",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "45 6 * * 1-5"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "ask-gemini-traffic",
+        "name": "Ask Gemini Pro",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          240,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAnnVmRDJTCRGKBvM80tEGpKmBa-f0CFpY",
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "{\"contents\": [{\"parts\": [{\"text\": \"Generate a morning commute traffic report for Dain driving from 6206 Redins Drive, Alexandria VA to St Thomas More Cathedral School, Arlington VA. Assume current time is ~6:45 AM EST on a weekday. Estimate the drive time based on typical I-395 N morning rush hour traffic. Mention the route (I-395 N). Keep it concise, helpful, and nicely formatted with emojis.\"}]}]}",
+          "options": {}
+        }
+      },
+      {
+        "id": "format-traffic-msg",
+        "name": "Format Message",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          480,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const text = $input.first().json.candidates?.[0]?.content?.parts?.[0]?.text || 'Traffic report unavailable.';\nreturn [{ json: { message: '\ud83d\ude97 *Morning Commute Update*\\n\\n' + text.trim() + '\\n\\n*(via n8n & Gemini Pro)*' } }];"
+        }
+      },
+      {
+        "id": "send-telegram-traffic",
+        "name": "Send to Telegram",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          720,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={ \"chat_id\": \"8305133249\", \"text\": {{ JSON.stringify($json.message) }} }",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Schedule 6:45 AM": {
+        "main": [
+          [
+            {
+              "node": "Ask Gemini Pro",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ask Gemini Pro": {
+        "main": [
+          [
+            {
+              "node": "Format Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Message": {
+        "main": [
+          [
+            {
+              "node": "Send to Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "DAIN BENTLEY",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}

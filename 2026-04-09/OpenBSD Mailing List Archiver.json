@@ -1,0 +1,233 @@
+{
+  "updatedAt": "2026-03-11T19:46:35.033Z",
+  "createdAt": "2026-03-11T19:46:35.033Z",
+  "id": "411yqv8YqOY9vzui",
+  "name": "OpenBSD Mailing List Archiver",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "schedule",
+      "name": "Schedule Every 30 Min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "gmail-fetch",
+      "name": "Get OpenBSD Emails",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        200,
+        0
+      ],
+      "parameters": {
+        "operation": "getAll",
+        "limit": 50,
+        "simple": true,
+        "filters": {
+          "q": "in:inbox label:\"OpenBSD Mailing List\""
+        }
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "73FQ8r7lzSZjobXf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "id": "gmail-archive",
+      "name": "Archive (Remove from Inbox)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        400,
+        0
+      ],
+      "parameters": {
+        "operation": "update",
+        "messageId": "={{ $json.messageId }}",
+        "updateFields": {
+          "removeLabelIds": [
+            "INBOX"
+          ]
+        }
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "73FQ8r7lzSZjobXf",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Every 30 Min": {
+      "main": [
+        [
+          {
+            "node": "Get OpenBSD Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get OpenBSD Emails": {
+      "main": [
+        [
+          {
+            "node": "Archive (Remove from Inbox)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Every 30 Min": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "277da06b-68dd-41a4-bb10-084eeb6eb935",
+  "activeVersionId": "277da06b-68dd-41a4-bb10-084eeb6eb935",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-03-11T19:46:35.033Z",
+      "createdAt": "2026-03-11T19:46:35.033Z",
+      "role": "workflow:owner",
+      "workflowId": "411yqv8YqOY9vzui",
+      "projectId": "5DJBfZzzizP5frZB"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-03-11T19:46:35.042Z",
+    "createdAt": "2026-03-11T19:46:35.042Z",
+    "versionId": "277da06b-68dd-41a4-bb10-084eeb6eb935",
+    "workflowId": "411yqv8YqOY9vzui",
+    "nodes": [
+      {
+        "id": "schedule",
+        "name": "Schedule Every 30 Min",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 30
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "gmail-fetch",
+        "name": "Get OpenBSD Emails",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1,
+        "position": [
+          200,
+          0
+        ],
+        "parameters": {
+          "operation": "getAll",
+          "limit": 50,
+          "simple": true,
+          "filters": {
+            "q": "in:inbox label:\"OpenBSD Mailing List\""
+          }
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "73FQ8r7lzSZjobXf",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "id": "gmail-archive",
+        "name": "Archive (Remove from Inbox)",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1,
+        "position": [
+          400,
+          0
+        ],
+        "parameters": {
+          "operation": "update",
+          "messageId": "={{ $json.messageId }}",
+          "updateFields": {
+            "removeLabelIds": [
+              "INBOX"
+            ]
+          }
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "73FQ8r7lzSZjobXf",
+            "name": "Gmail account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Schedule Every 30 Min": {
+        "main": [
+          [
+            {
+              "node": "Get OpenBSD Emails",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get OpenBSD Emails": {
+        "main": [
+          [
+            {
+              "node": "Archive (Remove from Inbox)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "DAIN BENTLEY",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}

@@ -28,6 +28,10 @@
     "onedrive-integration": {
       "version": "0.1.0",
       "installedAt": 1773026292959
+    },
+    "discord": {
+      "version": "1.0.1",
+      "installedAt": 1777518966532
     }
   }
 }

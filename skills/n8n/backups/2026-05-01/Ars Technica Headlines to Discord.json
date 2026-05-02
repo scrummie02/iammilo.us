@@ -1,0 +1,211 @@
+{
+  "updatedAt": "2026-04-28T01:31:48.783Z",
+  "createdAt": "2026-04-28T01:27:24.776Z",
+  "id": "ixR2Cw9k5KU0eMzD",
+  "name": "Ars Technica Headlines to Discord",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        250,
+        300
+      ],
+      "id": "4c76229f-305e-412f-bbb1-7d0c8bee994c"
+    },
+    {
+      "parameters": {
+        "url": "https://arstechnica.com/feed/",
+        "options": {}
+      },
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        470,
+        300
+      ],
+      "id": "a10d4d82-9778-45f7-87e4-7d93e04a24cc"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://discord.com/api/webhooks/1498496187261784065/U_GegrISA8NQUFeZQiYy5VaMvWsPeYpey2j2aKw4xKIhmqhKIag82XDFF16q5wBzY78I",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ $json.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Discord Webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        690,
+        300
+      ],
+      "id": "aa5c6eb1-c0b0-4b29-8612-ebc31be3b5bb"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Discord Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "0244a702-7c3f-4a02-a0d3-3420a487dfa4",
+  "activeVersionId": "0244a702-7c3f-4a02-a0d3-3420a487dfa4",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-04-28T01:27:24.776Z",
+      "createdAt": "2026-04-28T01:27:24.776Z",
+      "role": "workflow:owner",
+      "workflowId": "ixR2Cw9k5KU0eMzD",
+      "projectId": "RKVy2puwggBotitw"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-04-28T01:31:48.784Z",
+    "createdAt": "2026-04-28T01:31:48.784Z",
+    "versionId": "0244a702-7c3f-4a02-a0d3-3420a487dfa4",
+    "workflowId": "ixR2Cw9k5KU0eMzD",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 8 * * *"
+              }
+            ]
+          }
+        },
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          250,
+          300
+        ],
+        "id": "4c76229f-305e-412f-bbb1-7d0c8bee994c"
+      },
+      {
+        "parameters": {
+          "url": "https://arstechnica.com/feed/",
+          "options": {}
+        },
+        "name": "HTTP Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1,
+        "position": [
+          470,
+          300
+        ],
+        "id": "a10d4d82-9778-45f7-87e4-7d93e04a24cc"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://discord.com/api/webhooks/1498496187261784065/U_GegrISA8NQUFeZQiYy5VaMvWsPeYpey2j2aKw4xKIhmqhKIag82XDFF16q5wBzY78I",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "content",
+                "value": "={{ $json.content }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Discord Webhook",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1,
+        "position": [
+          690,
+          300
+        ],
+        "id": "aa5c6eb1-c0b0-4b29-8612-ebc31be3b5bb"
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "HTTP Request": {
+        "main": [
+          [
+            {
+              "node": "Discord Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "DAIN BENTLEY",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}

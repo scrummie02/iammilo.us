@@ -1,5 +1,5 @@
 # N8N Workflows
-*Last exported: 2026-04-03 02:03*  
+*Last exported: 2026-04-07 02:01*  
 *Instance: https://n8n.dainbentley.com*
 
 > To restore a workflow: go to n8n → Workflows → Import → paste the JSON file below.
@@ -2147,18 +2147,18 @@
   - `n8n-nodes-base.httpRequest` — **Push to Blog Container**
   - `n8n-nodes-base.httpRequest` — **Execute Push**
   - `n8n-nodes-base.webhook` — **Webhook**
-  - `n8n-nodes-base.mySql` — **Check DB**
+  - `n8n-nodes-base.code` — **Check DB**
   - `n8n-nodes-base.if` — **Is New?**
   - `n8n-nodes-base.httpRequest` — **Regenerate**
   - `n8n-nodes-base.code` — **Format Regen**
-  - `n8n-nodes-base.mySql` — **Mark Sent**
+  - `n8n-nodes-base.code` — **Mark Sent**
 
 <details>
 <summary>Full JSON config</summary>
 
 ```json
 {
-  "updatedAt": "2026-04-03T05:24:04.328Z",
+  "updatedAt": "2026-04-06T15:59:46.793Z",
   "createdAt": "2026-03-09T02:30:44.241Z",
   "id": "AjAjjxb9j94iE0JK",
   "name": "Daily Fact",
@@ -2316,21 +2316,14 @@
     {
       "id": "check-db-node",
       "name": "Check DB",
-      "type": "n8n-nodes-base.mySql",
-      "typeVersion": 2.4,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         720,
         0
       ],
       "parameters": {
-        "operation": "executeQuery",
-        "query": "=SELECT id FROM sent_facts WHERE content_hash = SHA2({{ JSON.stringify($json.message) }}, 256) LIMIT 1;"
-      },
-      "credentials": {
-        "mySql": {
-          "id": "vZlctd4g664kyvko",
-          "name": "MySQL account"
-        }
+        "jsCode": "const message = $input.first().json.message;\n\n// Pure JS simple string hash to avoid the 'crypto' module restriction in n8n code nodes\nfunction simpleHash(str) {\n  let hash = 0;\n  for (let i = 0; i < str.length; i++) {\n    const char = str.charCodeAt(i);\n    hash = ((hash << 5) - hash) + char;\n    hash = hash & hash;\n  }\n  return Math.abs(hash).toString(16);\n}\n\nconst hash = simpleHash(message);\n\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.sentHashes) staticData.sentHashes = [];\n\nconst found = staticData.sentHashes.includes(hash);\nreturn [{ json: { id: found ? hash : '', hash: hash, message: message } }];"
       }
     },
     {
@@ -2408,35 +2401,14 @@
     {
       "id": "mark-sent-node",
       "name": "Mark Sent",
-      "type": "n8n-nodes-base.mySql",
-      "typeVersion": 2.4,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         1440,
         0
       ],
       "parameters": {
-        "operation": "insert",
-        "table": {
-          "value": "sent_facts",
-          "__rl": true,
-          "mode": "name"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "values": [
-            {
-              "column": "content",
-              "type": "string",
-              "value": "={{ $('Format Message').item.json.message }}"
-            }
-          ]
-        }
-      },
-      "credentials": {
-        "mySql": {
-          "id": "vZlctd4g664kyvko",
-          "name": "MySQL account"
-        }
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.sentHashes) staticData.sentHashes = [];\n\nconst hash = $('Check DB').first().json.hash;\n\nif (!staticData.sentHashes.includes(hash)) {\n  staticData.sentHashes.push(hash);\n  // Keep last 500 to avoid unbounded growth\n  if (staticData.sentHashes.length > 500) {\n    staticData.sentHashes = staticData.sentHashes.slice(-500);\n  }\n}\nreturn [{ json: { status: 'ok' } }];"
       }
     }
   ],
@@ -2571,9 +2543,9 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "46ea716a-7fec-4b09-a9bd-635e10193bf2",
-  "activeVersionId": "46ea716a-7fec-4b09-a9bd-635e10193bf2",
-  "versionCounter": 58,
+  "versionId": "e674a6ec-1613-4b84-95fd-7c627bea4cda",
+  "activeVersionId": "e674a6ec-1613-4b84-95fd-7c627bea4cda",
+  "versionCounter": 73,
   "triggerCount": 2,
   "shared": [
     {
@@ -2596,9 +2568,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-04-03T05:24:04.330Z",
-    "createdAt": "2026-04-03T05:24:04.330Z",
-    "versionId": "46ea716a-7fec-4b09-a9bd-635e10193bf2",
+    "updatedAt": "2026-04-06T15:59:46.796Z",
+    "createdAt": "2026-04-06T15:59:46.796Z",
+    "versionId": "e674a6ec-1613-4b84-95fd-7c627bea4cda",
     "workflowId": "AjAjjxb9j94iE0JK",
     "nodes": [
       {
@@ -2751,21 +2723,14 @@
       {
         "id": "check-db-node",
         "name": "Check DB",
-        "type": "n8n-nodes-base.mySql",
-        "typeVersion": 2.4,
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
         "position": [
           720,
           0
         ],
         "parameters": {
-          "operation": "executeQuery",
-          "query": "=SELECT id FROM sent_facts WHERE content_hash = SHA2({{ JSON.stringify($json.message) }}, 256) LIMIT 1;"
-        },
-        "credentials": {
-          "mySql": {
-            "id": "vZlctd4g664kyvko",
-            "name": "MySQL account"
-          }
+          "jsCode": "const message = $input.first().json.message;\n\n// Pure JS simple string hash to avoid the 'crypto' module restriction in n8n code nodes\nfunction simpleHash(str) {\n  let hash = 0;\n  for (let i = 0; i < str.length; i++) {\n    const char = str.charCodeAt(i);\n    hash = ((hash << 5) - hash) + char;\n    hash = hash & hash;\n  }\n  return Math.abs(hash).toString(16);\n}\n\nconst hash = simpleHash(message);\n\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.sentHashes) staticData.sentHashes = [];\n\nconst found = staticData.sentHashes.includes(hash);\nreturn [{ json: { id: found ? hash : '', hash: hash, message: message } }];"
         }
       },
       {
@@ -2843,35 +2808,14 @@
       {
         "id": "mark-sent-node",
         "name": "Mark Sent",
-        "type": "n8n-nodes-base.mySql",
-        "typeVersion": 2.4,
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
         "position": [
           1440,
           0
         ],
         "parameters": {
-          "operation": "insert",
-          "table": {
-            "value": "sent_facts",
-            "__rl": true,
-            "mode": "name"
-          },
-          "columns": {
-            "mappingMode": "defineBelow",
-            "values": [
-              {
-                "column": "content",
-                "type": "string",
-                "value": "={{ $('Format Message').item.json.message }}"
-              }
-            ]
-          }
-        },
-        "credentials": {
-          "mySql": {
-            "id": "vZlctd4g664kyvko",
-            "name": "MySQL account"
-          }
+          "jsCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.sentHashes) staticData.sentHashes = [];\n\nconst hash = $('Check DB').first().json.hash;\n\nif (!staticData.sentHashes.includes(hash)) {\n  staticData.sentHashes.push(hash);\n  // Keep last 500 to avoid unbounded growth\n  if (staticData.sentHashes.length > 500) {\n    staticData.sentHashes = staticData.sentHashes.slice(-500);\n  }\n}\nreturn [{ json: { status: 'ok' } }];"
         }
       }
     ],
@@ -3000,18 +2944,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-04-03T05:24:04.414Z",
-        "id": 259,
+        "createdAt": "2026-04-06T15:59:46.877Z",
+        "id": 285,
         "workflowId": "AjAjjxb9j94iE0JK",
-        "versionId": "46ea716a-7fec-4b09-a9bd-635e10193bf2",
+        "versionId": "e674a6ec-1613-4b84-95fd-7c627bea4cda",
         "event": "deactivated",
         "userId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
       },
       {
-        "createdAt": "2026-04-03T05:24:04.446Z",
-        "id": 260,
+        "createdAt": "2026-04-06T15:59:46.924Z",
+        "id": 286,
         "workflowId": "AjAjjxb9j94iE0JK",
-        "versionId": "46ea716a-7fec-4b09-a9bd-635e10193bf2",
+        "versionId": "e674a6ec-1613-4b84-95fd-7c627bea4cda",
         "event": "activated",
         "userId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
       }
@@ -3038,18 +2982,18 @@
   - `n8n-nodes-base.httpRequest` — **Ask Gemini Pro**
   - `n8n-nodes-base.code` — **Format Message**
   - `n8n-nodes-base.httpRequest` — **Send to Telegram**
-  - `n8n-nodes-base.mySql` — **Check DB**
+  - `n8n-nodes-base.code` — **Check DB**
   - `n8n-nodes-base.if` — **Is New?**
   - `n8n-nodes-base.httpRequest` — **Regenerate**
   - `n8n-nodes-base.code` — **Format Regen**
-  - `n8n-nodes-base.mySql` — **Mark Sent**
+  - `n8n-nodes-base.code` — **Mark Sent**
 
 <details>
 <summary>Full JSON config</summary>
 
 ```json
 {
-  "updatedAt": "2026-04-03T05:24:13.191Z",
+  "updatedAt": "2026-04-06T15:59:46.411Z",
   "createdAt": "2026-03-09T13:36:37.916Z",
   "id": "m7EMbjBDyv2MMCBo",
   "name": "Daily Dad Joke",
@@ -3131,21 +3075,14 @@
     {
       "id": "check-db-node",
       "name": "Check DB",
-      "type": "n8n-nodes-base.mySql",
-      "typeVersion": 2.4,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         720,
         0
       ],
       "parameters": {
-        "operation": "executeQuery",
-        "query": "=SELECT id FROM sent_jokes WHERE content_hash = SHA2({{ JSON.stringify($json.message) }}, 256) LIMIT 1;"
-      },
-      "credentials": {
-        "mySql": {
-          "id": "vZlctd4g664kyvko",
-          "name": "MySQL account"
-        }
+        "jsCode": "const message = $input.first().json.message;\n\n// Pure JS simple string hash to avoid the 'crypto' module restriction in n8n code nodes\nfunction simpleHash(str) {\n  let hash = 0;\n  for (let i = 0; i < str.length; i++) {\n    const char = str.charCodeAt(i);\n    hash = ((hash << 5) - hash) + char;\n    hash = hash & hash;\n  }\n  return Math.abs(hash).toString(16);\n}\n\nconst hash = simpleHash(message);\n\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.sentHashes) staticData.sentHashes = [];\n\nconst found = staticData.sentHashes.includes(hash);\nreturn [{ json: { id: found ? hash : '', hash: hash, message: message } }];"
       }
     },
     {
@@ -3215,35 +3152,14 @@
     {
       "id": "mark-sent-node",
       "name": "Mark Sent",
-      "type": "n8n-nodes-base.mySql",
-      "typeVersion": 2.4,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         1440,
         0
       ],
       "parameters": {
-        "operation": "insert",
-        "table": {
-          "value": "sent_jokes",
-          "__rl": true,
-          "mode": "name"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "values": [
-            {
-              "column": "content",
-              "type": "string",
-              "value": "={{ $('Format Message').item.json.message }}"
-            }
-          ]
-        }
-      },
-      "credentials": {
-        "mySql": {
-          "id": "vZlctd4g664kyvko",
-          "name": "MySQL account"
-        }
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.sentHashes) staticData.sentHashes = [];\n\nconst hash = $('Check DB').first().json.hash;\n\nif (!staticData.sentHashes.includes(hash)) {\n  staticData.sentHashes.push(hash);\n  // Keep last 500 to avoid unbounded growth\n  if (staticData.sentHashes.length > 500) {\n    staticData.sentHashes = staticData.sentHashes.slice(-500);\n  }\n}\nreturn [{ json: { status: 'ok' } }];"
       }
     }
   ],
@@ -3356,9 +3272,9 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "76110aa1-884e-41c4-9639-c500c000e3c8",
-  "activeVersionId": "76110aa1-884e-41c4-9639-c500c000e3c8",
-  "versionCounter": 48,
+  "versionId": "5a89d55c-cfc5-4fc6-bb6f-2c0dff7c62d8",
+  "activeVersionId": "5a89d55c-cfc5-4fc6-bb6f-2c0dff7c62d8",
+  "versionCounter": 63,
   "triggerCount": 1,
   "shared": [
     {
@@ -3381,9 +3297,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-04-03T05:24:13.193Z",
-    "createdAt": "2026-04-03T05:24:13.193Z",
-    "versionId": "76110aa1-884e-41c4-9639-c500c000e3c8",
+    "updatedAt": "2026-04-06T15:59:46.416Z",
+    "createdAt": "2026-04-06T15:59:46.416Z",
+    "versionId": "5a89d55c-cfc5-4fc6-bb6f-2c0dff7c62d8",
     "workflowId": "m7EMbjBDyv2MMCBo",
     "nodes": [
       {
@@ -3460,21 +3376,14 @@
       {
         "id": "check-db-node",
         "name": "Check DB",
-        "type": "n8n-nodes-base.mySql",
-        "typeVersion": 2.4,
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
         "position": [
           720,
           0
         ],
         "parameters": {
-          "operation": "executeQuery",
-          "query": "=SELECT id FROM sent_jokes WHERE content_hash = SHA2({{ JSON.stringify($json.message) }}, 256) LIMIT 1;"
-        },
-        "credentials": {
-          "mySql": {
-            "id": "vZlctd4g664kyvko",
-            "name": "MySQL account"
-          }
+          "jsCode": "const message = $input.first().json.message;\n\n// Pure JS simple string hash to avoid the 'crypto' module restriction in n8n code nodes\nfunction simpleHash(str) {\n  let hash = 0;\n  for (let i = 0; i < str.length; i++) {\n    const char = str.charCodeAt(i);\n    hash = ((hash << 5) - hash) + char;\n    hash = hash & hash;\n  }\n  return Math.abs(hash).toString(16);\n}\n\nconst hash = simpleHash(message);\n\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.sentHashes) staticData.sentHashes = [];\n\nconst found = staticData.sentHashes.includes(hash);\nreturn [{ json: { id: found ? hash : '', hash: hash, message: message } }];"
         }
       },
       {
@@ -3544,35 +3453,14 @@
       {
         "id": "mark-sent-node",
         "name": "Mark Sent",
-        "type": "n8n-nodes-base.mySql",
-        "typeVersion": 2.4,
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
         "position": [
           1440,
           0
         ],
         "parameters": {
-          "operation": "insert",
-          "table": {
-            "value": "sent_jokes",
-            "__rl": true,
-            "mode": "name"
-          },
-          "columns": {
-            "mappingMode": "defineBelow",
-            "values": [
-              {
-                "column": "content",
-                "type": "string",
-                "value": "={{ $('Format Message').item.json.message }}"
-              }
-            ]
-          }
-        },
-        "credentials": {
-          "mySql": {
-            "id": "vZlctd4g664kyvko",
-            "name": "MySQL account"
-          }
+          "jsCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.sentHashes) staticData.sentHashes = [];\n\nconst hash = $('Check DB').first().json.hash;\n\nif (!staticData.sentHashes.includes(hash)) {\n  staticData.sentHashes.push(hash);\n  // Keep last 500 to avoid unbounded growth\n  if (staticData.sentHashes.length > 500) {\n    staticData.sentHashes = staticData.sentHashes.slice(-500);\n  }\n}\nreturn [{ json: { status: 'ok' } }];"
         }
       }
     ],
@@ -3679,18 +3567,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-04-03T05:24:13.263Z",
-        "id": 261,
+        "createdAt": "2026-04-06T15:59:46.496Z",
+        "id": 283,
         "workflowId": "m7EMbjBDyv2MMCBo",
-        "versionId": "76110aa1-884e-41c4-9639-c500c000e3c8",
+        "versionId": "5a89d55c-cfc5-4fc6-bb6f-2c0dff7c62d8",
         "event": "deactivated",
         "userId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
       },
       {
-        "createdAt": "2026-04-03T05:24:13.299Z",
-        "id": 262,
+        "createdAt": "2026-04-06T15:59:46.538Z",
+        "id": 284,
         "workflowId": "m7EMbjBDyv2MMCBo",
-        "versionId": "76110aa1-884e-41c4-9639-c500c000e3c8",
+        "versionId": "5a89d55c-cfc5-4fc6-bb6f-2c0dff7c62d8",
         "event": "activated",
         "userId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
       }
@@ -6071,10 +5959,10 @@
   },
   "staticData": {
     "node:Gmail Trigger": {
-      "lastTimeChecked": 1775191924,
+      "lastTimeChecked": 1775531142,
       "possibleDuplicates": [
-        "19d51af32d87b1d3",
-        "19d51ab92674ba96"
+        "19d65e73070c791c",
+        "19d65b3a4c517d3b"
       ]
     }
   },
@@ -6084,7 +5972,7 @@
   "pinData": {},
   "versionId": "f27c8ae2-0103-49f4-91ab-8d7a0d2fac35",
   "activeVersionId": "f27c8ae2-0103-49f4-91ab-8d7a0d2fac35",
-  "versionCounter": 1623,
+  "versionCounter": 1884,
   "triggerCount": 1,
   "shared": [
     {

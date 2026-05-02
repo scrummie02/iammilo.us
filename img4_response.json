@@ -1,0 +1,8 @@
+{
+  "error": {
+    "message": "Rate limit exceeded for images per minute in organization org-YTZbwfqUzgOCY9h9UzUHxrRS. Limit: 0/1min. Current: 1/1min. Please visit https://platform.openai.com/docs/guides/rate-limits to learn how to increase your rate limit.",
+    "type": "image_generation_user_error",
+    "param": null,
+    "code": "rate_limit_exceeded"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "name": "Daily Email Connectivity Test",
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 5 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "sendTo": "dain.bentley@protonmail.com",
+        "subject": "✅ Daily Email Connectivity Test",
+        "emailType": "text",
+        "message": "Hi Dain,\n\nThis is your daily automated email connectivity test.\n\nSent from: info@dainbentley.com\nTimestamp: {{ $now.toISO() }}\nWorkflow: Daily Email Connectivity Test\n\nIf you're reading this, your Gmail → ProtonMail pipeline is working.\n\n— MILO"
+      },
+      "id": "gmail-send",
+      "name": "Send Test Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [470, 300],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "73FQ8r7lzSZjobXf",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send Test Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

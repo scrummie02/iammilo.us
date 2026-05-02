@@ -1,0 +1,119 @@
+{
+  "name": "Daily Traffic Check - Gemini Fixed",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "55 6 * * *"
+            }
+          ]
+        }
+      },
+      "id": "673f443b-3d5f-4099-ae3d-0e319b78809e",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://maps.googleapis.com/maps/api/directions/json?origin=6206 Redins Drive, Alexandria, VA&destination=St. Thomas More Cathedral School, Arlington, VA&departure_time=now&alternatives=true&key=AIzaSyCsVL3icvukbWRNqt30QkuzLVZC0raT_BY",
+        "options": {}
+      },
+      "id": "e938222b-272a-4a25-bc28-98444983a54b",
+      "name": "Google Maps API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        670,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const routes = $input.all()[0].json.routes;\n\n// Sort routes by duration_in_traffic if available, else duration\nconst bestRoute = routes.sort((a, b) => {\n const timeA = a.legs[0].duration_in_traffic ? a.legs[0].duration_in_traffic.value : a.legs[0].duration.value;\n const timeB = b.legs[0].duration_in_traffic ? b.legs[0].duration_in_traffic.value : b.legs[0].duration.value;\n return timeA - timeB;\n})[0];\n\nconst durationTraffic = bestRoute.legs[0].duration_in_traffic ? bestRoute.legs[0].duration_in_traffic.text : bestRoute.legs[0].duration.text;\nconst durationNormal = bestRoute.legs[0].duration.text;\n\nreturn [{\n  json: {\n    summary: bestRoute.summary,\n    duration_traffic: durationTraffic,\n    distance: bestRoute.legs[0].distance.text,\n    message: `🚗 *Commute Update*\\n\\nRoute: ${bestRoute.summary}\\nDistance: ${bestRoute.legs[0].distance.text}\\nTraffic Time: *${durationTraffic}*\\n(Normal: ${durationNormal})`\n  }\n}];"
+      },
+      "id": "3f47c0a1-77d0-4098-967c-9b88e14e135b",
+      "name": "Calculate Best Route",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        890,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "8305133249"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.message }}"
+            },
+            {
+              "name": "parse_mode",
+              "value": "Markdown"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "telegram-notify",
+      "name": "Notify Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1110,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Maps API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Maps API": {
+      "main": [
+        [
+          {
+            "node": "Calculate Best Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Best Route": {
+      "main": [
+        [
+          {
+            "node": "Notify Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

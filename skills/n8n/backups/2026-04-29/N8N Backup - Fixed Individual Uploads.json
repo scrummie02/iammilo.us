@@ -1,0 +1,51 @@
+{
+"name": "N8N Backup - Fixed Individual Uploads",
+"type": "n8n-nodes-base.scheduleTrigger",
+"typeVersion": 1.1,
+"active": false,
+"updatedAt": "2026-04-13T00:47:33.115Z",
+"created": "2026-04-13T00:47:33.115Z",
+"id": "Tl1IXp2Ak5sgswp0",
+"connections": {},
+"nodes": [
+{
+"name": "Schedule Trigger",
+"type": "n8n-nodes-base.scheduleTrigger",
+"typeVersion": 1.1,
+"position": [-240, -112],
+"credentials": {}
+},
+{
+"name": "Get All Workflows",
+"type": "n8n-nodes-base.n8n",
+"typeVersion": 1,
+"position": [-48, -112],
+"credentials": {
+"n8nApi": {
+"id": "Tl7n4HrpONVqZBsZ",
+"name": "n8n account"
+}
+}
+},
+{
+"name": "Check for Changes",
+"type": "n8n-nodes-base.code",
+"typeVersion": 2,
+"position": [224, -112],
+"credentials": {},
+"parameters": {}
+},
+{
+"name": "Convert to File",
+"type": "n8n-nodes-base.convertToFile",
+"typeVersion": 1,
+"position": [464, -112],
+"credentials": {}
+}
+],
+"settings": {
+"executionOrder": "v1",
+"binaryMode": "separate"
+},
+"staticData": null
+}

@@ -1,0 +1,50 @@
+{
+"updated": "2026-04-29T03:00:00Z",
+"updatedAt": "2026-04-29T03:00:00Z",
+"id": "2026-04-29",
+"version": 1,
+"name": "2026-04-29",
+"workflow": "Get All Workflows",
+"type": "n8n-nodes-base.n8n",
+"created": "2026-04-29T03:00:00Z",
+"active": false,
+"isArchived": false,
+"nodes": [
+{
+"name": "Get All Workflows",
+"type": "n8n-nodes-base.n8n",
+"typeVersion": 1,
+"position": [-48, -112],
+"credentials": {
+"n8nApi": {
+"id": "Tl7n4HrpONVqZBsZ",
+"name": "n8n account"
+}
+},
+"parameters": {}
+},
+{
+"name": "Check for Changes",
+"type": "n8n-nodes-base.code",
+"typeVersion": 2,
+"position": [224, -112],
+"credentials": {},
+"parameters": {}
+},
+{
+"name": "Convert to File",
+"type": "n8n-nodes-base.convertToFile",
+"typeVersion": 1,
+"position": [464, -112],
+"credentials": {}
+},
+{
+"name": "Google Drive Upload",
+"type": "n8n-nodes-base.googleDrive",
+"typeVersion": 3,
+"position": [720, -112],
+"credentials": {}
+}
+],
+"connections": {}
+}

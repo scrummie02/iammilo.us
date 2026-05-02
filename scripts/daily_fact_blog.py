@@ -11,8 +11,8 @@ GEMINI_KEY = "AIzaSyAnnVmRDJTCRGKBvM80tEGpKmBa-f0CFpY"
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key={GEMINI_KEY}"
 PORTAINER = "http://192.168.200.220:9000"
 PTR_KEY = "ptr_jVGvpkWmxmPusWm3yZYeEvMU8LLMvYjqDm8iLmsRQjk="
-ENDPOINT = 6
-CONTAINER_ID = "0ed088a96df4"
+ENDPOINT = 7
+CONTAINER_ID = "229d7e527e84"
 
 def gemini(prompt):
     res = requests.post(GEMINI_URL, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=30)

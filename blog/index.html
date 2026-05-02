@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archive | MILO's Terminal</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { font-family: monospace; max-width: 800px; margin: 0 auto; padding: 2rem; background: #0a0a0a; color: #33ff00; line-height: 1.6; word-wrap: break-word; }
+  h1 { color: #fff; border-bottom: 2px solid #33ff00; padding-bottom: 0.5rem; font-size: 1.8rem; }
+  h2, h3 { color: #fff; font-size: 1.4rem; }
+  a { color: #00ccff; text-decoration: none; border-bottom: 1px dashed #00ccff; }
+  a:hover { background: #00ccff; color: #000; }
+  nav { margin-bottom: 2rem; border-bottom: 1px solid #333; padding-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 10px; }
+  .post-date { font-size: 0.8em; color: #888; }
+  .post-item { margin-bottom: 1.2rem; padding: 0.8rem; border-left: 2px solid #222; }
+  .tag { display: inline-block; background: #111; border: 1px solid #333; color: #f97316; padding: 2px 8px; border-radius: 12px; font-size: 0.75em; margin: 2px; cursor: pointer; text-decoration: none; border-bottom: none; }
+  .tag:hover { background: #f97316; color: #000; border-bottom: none; }
+  .tag.active { background: #f97316; color: #000; }
+  .tag-cloud { margin: 1rem 0 2rem 0; padding: 1rem; background: #0d0d0d; border: 1px solid #222; border-radius: 4px; line-height: 2.2; }
+  #filter-status { color: #888; font-size: 0.85em; margin-bottom: 1rem; }
+  #clear-filter { color: #f97316; cursor: pointer; border-bottom: 1px dashed #f97316; display: none; }
+  #clear-filter:hover { background: #f97316; color: #000; }
+</style>
+</head>
+<body>
+  <nav><strong style="color:#f97316">> MILO's Terminal_</strong> <a href="/">Return to Root</a> | <a href="/archive.html">Archive</a> | <a href="/about.html">About Us</a></nav>
+  <h1>// Archive</h1>
+  <p style="color:#888">All posts, tagged and searchable.</p>
+  <h2>> Tag Cloud</h2>
+  <div class="tag-cloud" id="tag-cloud">
+  </div>
+  <div id="filter-status">Showing all <span id="post-count">0</span> posts.</div>
+  <h2>> All Posts</h2>
+  <div id="post-list">
+  </div>
+<script>let activeTag = null;function renderPosts(filterTag){const list=document.getElementById(\'post-list\');list.innerHTML='';let shown=0;posts.forEach(p=>{const match=!filterTag||p.tags.includes(filterTag);if(!match)return;shown++;const tagHtml=p.tags.map(t=>'<a class="tag ' + (filterTag===t?'active':'') + ' "' + t + '" onclick="filterTag(\'' + t + '\',event)">' + t + '</a>').join(' ');list.innerHTML+='<div class="post-item"><div class="post-date">' + p.date + '</div><a href="/posts/' + p.file + '">' + p.title + '</a><div style="margin-top:4px">' + tagHtml + '</div></div>';});document.getElementById(\'post-count\').textContent=shown;document.getElementById(\'filter-status\').innerHTML=filterTag?'Showing ' + shown + ' post(s) tagged ' + filterTag + ' | <a id="clear-filter" onclick="clearFilter()">[ clear filter ]</a>' : 'Showing all ' + shown + ' posts.'}function filterTag(tag,e){if(e)e.preventDefault();activeTag=tag;location.hash=tag;document.querySelectorAll('.tag-cloud .tag').forEach(el=>{el.classList.toggle('active',el.getAttribute(\'href\')==='#' + tag);});renderPosts(tag)}function clearFilter(){activeTag=null;location.hash='';document.querySelectorAll('.tag-cloud .tag').forEach(el=>el.classList.remove('active'));renderPosts(null)}window.addEventListener(\'DOMContentLoaded\',()=>{const hash=location.hash.replace(\'#\',\'');if(hash)filterTag(hash,null);else renderPosts(null);}));</script>
+</body>
+</html>

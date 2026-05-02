@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fleet Dashboard</title>
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+  <div class="dashboard">
+    <header class="dashboard-header">
+      <h1>Fleet Dashboard</h1>
+      <div class="date">April 27, 2026</div>
+    </header>
+    
+    <div class="stats-grid">
+      <div class="stat-card" data-source="fleet_api">
+        <div class="stat-icon vehicle">🚗</div>
+        <div class="stat-value">18</div>
+        <div class="stat-label">Total Vehicles</div>
+      </div>
+      
+      <div class="stat-card" data-source="fuel_system">
+        <div class="stat-icon fuel">⛽</div>
+        <div class="stat-value">94%</div>
+        <div class="stat-label">Avg Fuel</div>
+      </div>
+      
+      <div class="stat-card" data-source="maintenance">
+        <div class="stat-icon tools">🔧</div>
+        <div class="stat-value">3</div>
+        <div class="stat-label">Upcoming</div>
+      </div>
+      
+      <div class="stat-card" data-source="alerts">
+        <div class="stat-icon alert">⚠️</div>
+        <div class="stat-value">1</div>
+        <div class="stat-label">Issues</div>
+      </div>
+    </div>
+    
+    <div class="vehicle-list">
+      <h2>Active Fleet</h2>
+      
+      <div class="vehicle-item" data-id="1">
+        <div class="vehicle-header">
+          <span class="vehicle-number">F-150</span>
+          <span class="vehicle-status">On Shift</span>
+        </div>
+        <div class="vehicle-info">
+          <span class="location">Alexandria, VA</span>
+          <span class="capacity">3500 lb</span>
+          <span class="fuel">94%</span>
+        </div>
+      </div>
+      
+      <div class="vehicle-item" data-id="2">
+        <div class="vehicle-header">
+          <span class="vehicle-number">RAM</span>
+          <span class="vehicle-status">In Transit</span>
+        </div>
+        <div class="vehicle-info">
+          <span class="location">St. Thomas More, VA</span>
+          <span class="capacity">4200 lb</span>
+          <span class="fuel">92%</span>
+        </div>
+      </div>
+      
+      <div class="vehicle-item" data-id="3">
+        <div class="vehicle-header">
+          <span class="vehicle-number">HD</span>
+          <span class="vehicle-status">Maintenance</span>
+        </div>
+        <div class="vehicle-info">
+          <span class="location">On Site</span>
+          <span class="capacity">5000 lb</span>
+          <span class="fuel">88%</span>
+        </div>
+      </div>
+      
+      <div class="vehicle-item" data-id="4">
+        <div class="vehicle-header">
+          <span class="vehicle-number">TUNDRA</span>
+          <span class="vehicle-status">In Transit</span>
+        </div>
+        <div class="vehicle-info">
+          <span class="location">Alexandria, VA</span>
+          <span class="capacity">4500 lb</span>
+          <span class="fuel">96%</span>
+        </div>
+      </div>
+    </div>
+    
+    <footer class="dashboard-footer">
+      <p>Fleet Management System v2.1</p>
+      <p>Dashboard refreshed: 8:05 PM EST</p>
+    </footer>
+  </div>
+</body>
+</html>

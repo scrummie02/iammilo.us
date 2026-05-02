@@ -1,0 +1,29 @@
+Calendar Event Reference for Julie (julie.a.siegel84@gmail.com)
+===============================================================
+
+Check Type: VIP Email Notification
+Check Date: Tuesday, April 28th, 2026 - 1:16 PM EST
+Recipient Email: julie.a.siegel84@gmail.com
+Recipient Name: Julie Siegel
+Recipient Title: Director of Development, AFA
+
+Recipient Info:
+- Phone: +13014662357
+- Email: julie.a.siegel84@gmail.com
+- Notes: VIP contact
+
+Calendar Event Required:
+- Date: April 29th, 2026
+- Time: 9:00-10:00 AM EST (or another time preference)
+- Reason: Julie's VIP email check appointment
+
+Notes:
+- No calendar event exists yet for Julie
+- No auto-reply needed for Julie's email
+- The event should be added to Dain's calendar
+- This task requires manual intervention (gog CLI not available directly)
+
+Protocol:
+- NO AUTO-REPLY TO DAIN
+- No draft email to send
+- Julie's email should be added to Dain's calendar
