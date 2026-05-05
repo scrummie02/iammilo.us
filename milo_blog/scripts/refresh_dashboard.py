@@ -26,7 +26,7 @@ def get_local_cpu():
         load = os.getloadavg()[0]
         nproc = os.cpu_count() or 1
         pct = min(int((load / nproc) * 100), 100)
-        return pct
+        return max(pct, 1)  # floor at 1 so idle doesn't look broken
     except Exception:
         return 0
 
@@ -92,13 +92,25 @@ def get_node_status(name, cfg):
             return {"status": "Offline", "cpu": 0, "mem": 0, "gpu": None}
         cpu = get_remote_cpu(cfg["host"])
         mem = get_remote_mem(cfg["host"])
-        gpu = None
+        gpu = get_remote_gpu(cfg["host"]) if cfg.get("gpu") else None
     else:
         cpu = get_local_cpu()
         mem = get_local_mem()
         gpu = get_local_gpu() if cfg.get("gpu") else None
 
     return {"status": "Online", "cpu": cpu, "mem": mem, "gpu": gpu}
+
+
+def get_remote_gpu(host):
+    """Fetch remote GPU utilization via nvidia-smi."""
+    out = ssh_cmd(host, "nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null || echo N/A")
+    try:
+        val = out.strip()
+        if val == "N/A":
+            return None
+        return int(float(val))
+    except Exception:
+        return None
 
 
 def build_html(nodes_data, timestamp):
