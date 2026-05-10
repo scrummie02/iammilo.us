@@ -1,1 +1,9 @@
-[2m2026-05-09T04:51:35.395092Z[0m [33m WARN[0m [2memail::imap[0m[2m:[0m authentication failed [3mmechanism[0m[2m=[0mPlain [3merr[0m[2m=[0mStream(State(Flow(MalformedMessage { discarded_bytes: /* REDACTED */ })))
+[2m2026-05-10T08:49:49.129829Z[0m [33m WARN[0m [2memail::imap[0m[2m:[0m authentication failed [3mmechanism[0m[2m=[0mPlain [3merr[0m[2m=[0mResolveTask(UnexpectedNoResponse(StatusBody { kind: No, code: Some(Other(CodeOther(b"AUTHENTICATIONFAILED"))), text: Text("Invalid credentials (Failure)") }))
+Error: 
+   0: [91mcannot build IMAP client[0m
+   1: [91mcannot authenticate to IMAP server using LOGIN mechanism[0m
+   2: [91mcannot resolve IMAP task[0m
+   3: [91munexpected NO response: Invalid credentials (Failure)[0m
+
+[96mNote[0m: Run with --debug to enable logs with spantrace.
+[96mNote[0m: Run with --trace to enable verbose logs with backtrace.

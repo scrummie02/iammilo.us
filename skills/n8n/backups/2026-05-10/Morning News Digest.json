@@ -1,0 +1,665 @@
+{
+  "updatedAt": "2026-03-14T16:50:53.407Z",
+  "createdAt": "2026-03-08T15:30:32.635Z",
+  "id": "LvwMEORrcb1rRQuT",
+  "name": "Morning News Digest",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "schedule",
+      "name": "Schedule 6:30AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 6 * * *"
+            }
+          ]
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "name": "Fox World RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        200,
+        100
+      ],
+      "parameters": {
+        "url": "https://moxie.foxnews.com/google-publisher/world.xml"
+      },
+      "alwaysOutputData": true,
+      "continueOnFail": true,
+      "id": "9268fc0a-4bcf-4547-afaa-0e2b9abfee60"
+    },
+    {
+      "name": "Fox Science RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        200,
+        220
+      ],
+      "parameters": {
+        "url": "https://moxie.foxnews.com/google-publisher/science.xml"
+      },
+      "alwaysOutputData": true,
+      "continueOnFail": true,
+      "id": "533e76f1-a00f-4005-b16e-8b423910473b"
+    },
+    {
+      "name": "Ars Technica RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        200,
+        340
+      ],
+      "parameters": {
+        "url": "https://feeds.arstechnica.com/arstechnica/index"
+      },
+      "alwaysOutputData": true,
+      "continueOnFail": true,
+      "id": "5ff785fa-96a0-4555-b443-398170e57372"
+    },
+    {
+      "name": "BBC Science RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        200,
+        460
+      ],
+      "parameters": {
+        "url": "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml"
+      },
+      "alwaysOutputData": true,
+      "continueOnFail": true,
+      "id": "0e4ef9f2-595f-4024-84ef-b6ef05b660e7"
+    },
+    {
+      "name": "NPR News RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        200,
+        580
+      ],
+      "parameters": {
+        "url": "https://feeds.npr.org/1001/rss.xml"
+      },
+      "alwaysOutputData": true,
+      "continueOnFail": true,
+      "id": "8c845e1d-5046-4f8b-a664-22c381c3cd0e"
+    },
+    {
+      "id": "format",
+      "name": "Format Digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        360
+      ],
+      "parameters": {
+        "jsCode": "const today = new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});\n\nfunction getTop(nodeId, n) {\n  try {\n    const items = $(nodeId).all();\n    return items.slice(0, n).map(i => ({\n      title: (i.json.title || '').replace(/[*[\\]]/g, '').trim(),\n      link: i.json.link || ''\n    })).filter(p => p.title);\n  } catch(e) { return []; }\n}\n\nlet msg = '\\u{1F4F0} *News Briefing \\u2014 ' + today + '*\\n\\n';\n\nconst world = getTop('Fox World RSS', 3);\nif (world.length) {\n  msg += '\\u{1F30D} *World* (Fox News)\\n';\n  for (const p of world) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\nconst cnn = getTop('CNN RSS', 2);\nif (cnn.length) {\n  msg += '\\u{1F4FA} *CNN*\\n';\n  for (const p of cnn) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\nconst reuters = getTop('Reuters via Yahoo RSS', 2);\nif (reuters.length) {\n  msg += '\\u{1F4DC} *Reuters / Yahoo World*\\n';\n  for (const p of reuters) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\nconst tech = getTop('Ars Technica RSS', 3);\nif (tech.length) {\n  msg += '\\u{1F4BB} *Tech* (Ars Technica)\\n';\n  for (const p of tech) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\nconst sci = [...getTop('Fox Science RSS', 2), ...getTop('BBC Science RSS', 2)].slice(0, 3);\nif (sci.length) {\n  msg += '\\u{1F52C} *Science*\\n';\n  for (const p of sci) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\nconst npr = getTop('NPR News RSS', 2);\nif (npr.length) {\n  msg += '\\u{1F3A4} *NPR*\\n';\n  for (const p of npr) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n}\n\nif (msg.split('\\n').length < 4) {\n  msg += '\\n_No stories available right now._';\n}\n\nreturn [{ json: { message: msg.trim() } }];"
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "send",
+      "name": "Send to Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        760,
+        360
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={ \"chat_id\": \"8305133249\", \"text\": {{ JSON.stringify($json.message) }}, \"parse_mode\": \"Markdown\" }",
+        "options": {}
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "name": "CNN RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        200,
+        700
+      ],
+      "parameters": {
+        "url": "http://rss.cnn.com/rss/cnn_topstories.rss"
+      },
+      "alwaysOutputData": true,
+      "continueOnFail": true,
+      "id": "6021c416-3793-4f26-add4-36648e97f466"
+    },
+    {
+      "name": "Reuters via Yahoo RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        200,
+        820
+      ],
+      "parameters": {
+        "url": "https://news.yahoo.com/rss/world"
+      },
+      "alwaysOutputData": true,
+      "continueOnFail": true,
+      "id": "e78da193-5624-42db-9077-9659f9f14ee8"
+    }
+  ],
+  "connections": {
+    "Schedule 6:30AM": {
+      "main": [
+        [
+          {
+            "node": "Fox World RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fox Science RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Ars Technica RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "BBC Science RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "NPR News RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "CNN RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reuters via Yahoo RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fox World RSS": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fox Science RSS": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ars Technica RSS": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BBC Science RSS": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NPR News RSS": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Digest": {
+      "main": [
+        [
+          {
+            "node": "Send to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CNN RSS": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reuters via Yahoo RSS": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "saveDataSuccessExecution": "all"
+  },
+  "staticData": {
+    "node:Schedule 8AM": {
+      "recurrenceRules": []
+    },
+    "node:Schedule 6:30AM": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "e4a6c540-caa0-4841-b349-e8740e394d50",
+  "activeVersionId": "e4a6c540-caa0-4841-b349-e8740e394d50",
+  "versionCounter": 54,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-03-08T15:30:32.635Z",
+      "createdAt": "2026-03-08T15:30:32.635Z",
+      "role": "workflow:owner",
+      "workflowId": "LvwMEORrcb1rRQuT",
+      "projectId": "5DJBfZzzizP5frZB",
+      "project": {
+        "updatedAt": "2026-03-06T04:53:21.134Z",
+        "createdAt": "2026-03-06T04:52:56.613Z",
+        "id": "5DJBfZzzizP5frZB",
+        "name": "DAIN BENTLEY <dain.bentley@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-03-14T16:50:53.410Z",
+    "createdAt": "2026-03-14T16:50:53.410Z",
+    "versionId": "e4a6c540-caa0-4841-b349-e8740e394d50",
+    "workflowId": "LvwMEORrcb1rRQuT",
+    "nodes": [
+      {
+        "id": "schedule",
+        "name": "Schedule 6:30AM",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "30 6 * * *"
+              }
+            ]
+          }
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "name": "Fox World RSS",
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1,
+        "position": [
+          200,
+          100
+        ],
+        "parameters": {
+          "url": "https://moxie.foxnews.com/google-publisher/world.xml"
+        },
+        "alwaysOutputData": true,
+        "continueOnFail": true,
+        "id": "9268fc0a-4bcf-4547-afaa-0e2b9abfee60"
+      },
+      {
+        "name": "Fox Science RSS",
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1,
+        "position": [
+          200,
+          220
+        ],
+        "parameters": {
+          "url": "https://moxie.foxnews.com/google-publisher/science.xml"
+        },
+        "alwaysOutputData": true,
+        "continueOnFail": true,
+        "id": "533e76f1-a00f-4005-b16e-8b423910473b"
+      },
+      {
+        "name": "Ars Technica RSS",
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1,
+        "position": [
+          200,
+          340
+        ],
+        "parameters": {
+          "url": "https://feeds.arstechnica.com/arstechnica/index"
+        },
+        "alwaysOutputData": true,
+        "continueOnFail": true,
+        "id": "5ff785fa-96a0-4555-b443-398170e57372"
+      },
+      {
+        "name": "BBC Science RSS",
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1,
+        "position": [
+          200,
+          460
+        ],
+        "parameters": {
+          "url": "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml"
+        },
+        "alwaysOutputData": true,
+        "continueOnFail": true,
+        "id": "0e4ef9f2-595f-4024-84ef-b6ef05b660e7"
+      },
+      {
+        "name": "NPR News RSS",
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1,
+        "position": [
+          200,
+          580
+        ],
+        "parameters": {
+          "url": "https://feeds.npr.org/1001/rss.xml"
+        },
+        "alwaysOutputData": true,
+        "continueOnFail": true,
+        "id": "8c845e1d-5046-4f8b-a664-22c381c3cd0e"
+      },
+      {
+        "id": "format",
+        "name": "Format Digest",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          520,
+          360
+        ],
+        "parameters": {
+          "jsCode": "const today = new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});\n\nfunction getTop(nodeId, n) {\n  try {\n    const items = $(nodeId).all();\n    return items.slice(0, n).map(i => ({\n      title: (i.json.title || '').replace(/[*[\\]]/g, '').trim(),\n      link: i.json.link || ''\n    })).filter(p => p.title);\n  } catch(e) { return []; }\n}\n\nlet msg = '\\u{1F4F0} *News Briefing \\u2014 ' + today + '*\\n\\n';\n\nconst world = getTop('Fox World RSS', 3);\nif (world.length) {\n  msg += '\\u{1F30D} *World* (Fox News)\\n';\n  for (const p of world) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\nconst cnn = getTop('CNN RSS', 2);\nif (cnn.length) {\n  msg += '\\u{1F4FA} *CNN*\\n';\n  for (const p of cnn) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\nconst reuters = getTop('Reuters via Yahoo RSS', 2);\nif (reuters.length) {\n  msg += '\\u{1F4DC} *Reuters / Yahoo World*\\n';\n  for (const p of reuters) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\nconst tech = getTop('Ars Technica RSS', 3);\nif (tech.length) {\n  msg += '\\u{1F4BB} *Tech* (Ars Technica)\\n';\n  for (const p of tech) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\nconst sci = [...getTop('Fox Science RSS', 2), ...getTop('BBC Science RSS', 2)].slice(0, 3);\nif (sci.length) {\n  msg += '\\u{1F52C} *Science*\\n';\n  for (const p of sci) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n  msg += '\\n';\n}\n\nconst npr = getTop('NPR News RSS', 2);\nif (npr.length) {\n  msg += '\\u{1F3A4} *NPR*\\n';\n  for (const p of npr) msg += `\\u2022 [${p.title}](${p.link})\\n`;\n}\n\nif (msg.split('\\n').length < 4) {\n  msg += '\\n_No stories available right now._';\n}\n\nreturn [{ json: { message: msg.trim() } }];"
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "id": "send",
+        "name": "Send to Telegram",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          760,
+          360
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={ \"chat_id\": \"8305133249\", \"text\": {{ JSON.stringify($json.message) }}, \"parse_mode\": \"Markdown\" }",
+          "options": {}
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "name": "CNN RSS",
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1,
+        "position": [
+          200,
+          700
+        ],
+        "parameters": {
+          "url": "http://rss.cnn.com/rss/cnn_topstories.rss"
+        },
+        "alwaysOutputData": true,
+        "continueOnFail": true,
+        "id": "6021c416-3793-4f26-add4-36648e97f466"
+      },
+      {
+        "name": "Reuters via Yahoo RSS",
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1,
+        "position": [
+          200,
+          820
+        ],
+        "parameters": {
+          "url": "https://news.yahoo.com/rss/world"
+        },
+        "alwaysOutputData": true,
+        "continueOnFail": true,
+        "id": "e78da193-5624-42db-9077-9659f9f14ee8"
+      }
+    ],
+    "connections": {
+      "Schedule 6:30AM": {
+        "main": [
+          [
+            {
+              "node": "Fox World RSS",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Fox Science RSS",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Ars Technica RSS",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "BBC Science RSS",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "NPR News RSS",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "CNN RSS",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Reuters via Yahoo RSS",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fox World RSS": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fox Science RSS": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ars Technica RSS": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "BBC Science RSS": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "NPR News RSS": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Digest": {
+        "main": [
+          [
+            {
+              "node": "Send to Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "CNN RSS": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Reuters via Yahoo RSS": {
+        "main": [
+          [
+            {
+              "node": "Format Digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "DAIN BENTLEY",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-03-14T16:50:53.560Z",
+        "id": 170,
+        "workflowId": "LvwMEORrcb1rRQuT",
+        "versionId": "e4a6c540-caa0-4841-b349-e8740e394d50",
+        "event": "deactivated",
+        "userId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
+      },
+      {
+        "createdAt": "2026-03-14T16:50:53.590Z",
+        "id": 171,
+        "workflowId": "LvwMEORrcb1rRQuT",
+        "versionId": "e4a6c540-caa0-4841-b349-e8740e394d50",
+        "event": "activated",
+        "userId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
+      }
+    ]
+  },
+  "_backup_source": "local_file",
+  "_backup_filename": "morning_news_digest.json"
+}

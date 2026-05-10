@@ -1,0 +1,458 @@
+{
+  "updatedAt": "2026-03-06T14:10:00.624Z",
+  "createdAt": "2026-03-06T05:36:26.364Z",
+  "id": "JbekZR8r1ebXe16n",
+  "name": "Notary Request Intake (Gemma Local)",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "q": "is:unread -from:me"
+        }
+      },
+      "id": "trigger-gmail",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "73FQ8r7lzSZjobXf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.200.240:11434/api/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"model\": \"gemma3:12b\",\n  \"prompt\": \"You are a Notary Service Assistant. Your task is to analyze incoming emails and determine if they are requests for notary or loan signing services. CRITICAL RULE: If the email contains ANY mention of 'notary', 'notarize', 'loan signing', 'signing agent', 'closing', or 'documents to sign', you MUST set isNotaryRequest to true. Extract the following fields if available, otherwise use 'Not provided': - clientName, - serviceType, - preferredDateTime, - location, - phone. Return ONLY a valid JSON object with these keys: isNotaryRequest (boolean), clientName (string), serviceType (string), preferredDateTime (string), location (string), phone (string). Email Subject: {{ ($json.Subject || $json.subject || '').replace(/\"/g, '\\\\\"').replace(/\\n/g, ' ') }} Email Body: {{ ($json.textPlain || $json.snippet || '').replace(/\"/g, '\\\\\"').replace(/\\n/g, ' ') }}\",\n  \"format\": \"json\",\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "id": "gemini-extract",
+      "name": "Extract with Gemma",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "try {\n  return $input.all().map((item) => {\n    const text = item.json.response;\n    const data = JSON.parse(text);\n    const triggerData = $('Gmail Trigger').all()[item.pairedItem.item].json;\n    const subject = (triggerData.Subject || triggerData.subject || '').toLowerCase();\n    const body = (triggerData.textPlain || triggerData.snippet || '').toLowerCase();\n    const keywords = ['notary', 'notarize', 'loan signing', 'signing agent', 'closing'];\n    if (!data.isNotaryRequest) {\n      if (keywords.some(k => subject.includes(k) || body.includes(k))) {\n        data.isNotaryRequest = true;\n      }\n    }\n    // Extract sender name from From field as fallback\n    const fromRaw = triggerData.From?.value || triggerData.From || triggerData.from?.value || triggerData.from || '';\n    const fromStr = typeof fromRaw === 'string' ? fromRaw : (fromRaw[0]?.name || fromRaw[0]?.address || '');\n    const nameMatch = fromStr.match(/^([^<]+)</  );\n    const senderName = nameMatch ? nameMatch[1].trim() : fromStr.split('@')[0];\n    if (!data.clientName || data.clientName === 'Not provided') {\n      data.clientName = senderName || 'Not provided';\n    }\n    data.originalSender = fromStr;\n    data.originalSubject = triggerData.Subject || triggerData.subject;\n    return { json: data };\n  });\n} catch (e) {\n  return [{ json: { isNotaryRequest: false, error: e.message } }];\n}"
+      },
+      "id": "parse-json",
+      "name": "Parse AI Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.isNotaryRequest }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check-if-notary",
+      "name": "Is Notary Request?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        672,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\"chat_id\":\"8305133249\",\"text\":\"\ud83d\udea8 *New Notary Request* \ud83d\udea8\\n\\n*Client:* {{ $json.clientName }}\\n*Service:* {{ $json.serviceType }}\\n*When:* {{ $json.preferredDateTime }}\\n*Where:* {{ $json.location }}\\n*Phone:* {{ $json.phone }}\\n\\n_Auto-reply has been sent._\",\"parse_mode\":\"Markdown\"}",
+        "options": {}
+      },
+      "id": "notify-telegram",
+      "name": "Notify Dain",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        912,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.originalSender }}",
+        "subject": "=Re: {{ $json.originalSubject }}",
+        "message": "Hi {{ $json.clientName !== 'Not provided' ? $json.clientName : 'there' }},\n\nThank you for reaching out to Dain Bentley Management.\n\nI have received your request for notary services. I will review your details and get back to you shortly to confirm our appointment.\n\nBest regards,\n\nDain Bentley\nDain Bentley Management LLC",
+        "options": {}
+      },
+      "id": "auto-reply",
+      "name": "Auto-Reply to Client",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        912,
+        112
+      ],
+      "webhookId": "199ebec3-ef73-4c7d-b903-1996aae3a633",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "73FQ8r7lzSZjobXf",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extract with Gemma",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Output": {
+      "main": [
+        [
+          {
+            "node": "Is Notary Request?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Notary Request?": {
+      "main": [
+        [
+          {
+            "node": "Notify Dain",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Auto-Reply to Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract with Gemma": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Gmail Trigger": {
+      "lastTimeChecked": 1772982174,
+      "possibleDuplicates": [
+        "19ccdf91075ff098",
+        "19cc8ad703f98c56"
+      ]
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "7dd2d500-087e-4bd8-b253-786ca2780090",
+  "activeVersionId": "7dd2d500-087e-4bd8-b253-786ca2780090",
+  "versionCounter": 163,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-03-06T05:36:26.364Z",
+      "createdAt": "2026-03-06T05:36:26.364Z",
+      "role": "workflow:owner",
+      "workflowId": "JbekZR8r1ebXe16n",
+      "projectId": "5DJBfZzzizP5frZB",
+      "project": {
+        "updatedAt": "2026-03-06T04:53:21.134Z",
+        "createdAt": "2026-03-06T04:52:56.613Z",
+        "id": "5DJBfZzzizP5frZB",
+        "name": "DAIN BENTLEY <dain.bentley@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-03-06T14:10:00.630Z",
+    "createdAt": "2026-03-06T14:10:00.630Z",
+    "versionId": "7dd2d500-087e-4bd8-b253-786ca2780090",
+    "workflowId": "JbekZR8r1ebXe16n",
+    "nodes": [
+      {
+        "parameters": {
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "filters": {
+            "q": "is:unread -from:me"
+          }
+        },
+        "id": "trigger-gmail",
+        "name": "Gmail Trigger",
+        "type": "n8n-nodes-base.gmailTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ],
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "73FQ8r7lzSZjobXf",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://192.168.200.240:11434/api/generate",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {}
+            ]
+          },
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={\n  \"model\": \"gemma3:12b\",\n  \"prompt\": \"You are a Notary Service Assistant. Your task is to analyze incoming emails and determine if they are requests for notary or loan signing services. CRITICAL RULE: If the email contains ANY mention of 'notary', 'notarize', 'loan signing', 'signing agent', 'closing', or 'documents to sign', you MUST set isNotaryRequest to true. Extract the following fields if available, otherwise use 'Not provided': - clientName, - serviceType, - preferredDateTime, - location, - phone. Return ONLY a valid JSON object with these keys: isNotaryRequest (boolean), clientName (string), serviceType (string), preferredDateTime (string), location (string), phone (string). Email Subject: {{ ($json.Subject || $json.subject || '').replace(/\"/g, '\\\\\"').replace(/\\n/g, ' ') }} Email Body: {{ ($json.textPlain || $json.snippet || '').replace(/\"/g, '\\\\\"').replace(/\\n/g, ' ') }}\",\n  \"format\": \"json\",\n  \"stream\": false\n}",
+          "options": {}
+        },
+        "id": "gemini-extract",
+        "name": "Extract with Gemma",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          224,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "try {\n  return $input.all().map((item) => {\n    const text = item.json.response;\n    const data = JSON.parse(text);\n    const triggerData = $('Gmail Trigger').all()[item.pairedItem.item].json;\n    const subject = (triggerData.Subject || triggerData.subject || '').toLowerCase();\n    const body = (triggerData.textPlain || triggerData.snippet || '').toLowerCase();\n    const keywords = ['notary', 'notarize', 'loan signing', 'signing agent', 'closing'];\n    if (!data.isNotaryRequest) {\n      if (keywords.some(k => subject.includes(k) || body.includes(k))) {\n        data.isNotaryRequest = true;\n      }\n    }\n    // Extract sender name from From field as fallback\n    const fromRaw = triggerData.From?.value || triggerData.From || triggerData.from?.value || triggerData.from || '';\n    const fromStr = typeof fromRaw === 'string' ? fromRaw : (fromRaw[0]?.name || fromRaw[0]?.address || '');\n    const nameMatch = fromStr.match(/^([^<]+)</  );\n    const senderName = nameMatch ? nameMatch[1].trim() : fromStr.split('@')[0];\n    if (!data.clientName || data.clientName === 'Not provided') {\n      data.clientName = senderName || 'Not provided';\n    }\n    data.originalSender = fromStr;\n    data.originalSubject = triggerData.Subject || triggerData.subject;\n    return { json: data };\n  });\n} catch (e) {\n  return [{ json: { isNotaryRequest: false, error: e.message } }];\n}"
+        },
+        "id": "parse-json",
+        "name": "Parse AI Output",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          448,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $json.isNotaryRequest }}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "id": "check-if-notary",
+        "name": "Is Notary Request?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [
+          672,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={\"chat_id\":\"8305133249\",\"text\":\"\ud83d\udea8 *New Notary Request* \ud83d\udea8\\n\\n*Client:* {{ $json.clientName }}\\n*Service:* {{ $json.serviceType }}\\n*When:* {{ $json.preferredDateTime }}\\n*Where:* {{ $json.location }}\\n*Phone:* {{ $json.phone }}\\n\\n_Auto-reply has been sent._\",\"parse_mode\":\"Markdown\"}",
+          "options": {}
+        },
+        "id": "notify-telegram",
+        "name": "Notify Dain",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          912,
+          -96
+        ]
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ $json.originalSender }}",
+          "subject": "=Re: {{ $json.originalSubject }}",
+          "message": "Hi {{ $json.clientName !== 'Not provided' ? $json.clientName : 'there' }},\n\nThank you for reaching out to Dain Bentley Management.\n\nI have received your request for notary services. I will review your details and get back to you shortly to confirm our appointment.\n\nBest regards,\n\nDain Bentley\nDain Bentley Management LLC",
+          "options": {}
+        },
+        "id": "auto-reply",
+        "name": "Auto-Reply to Client",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1,
+        "position": [
+          912,
+          112
+        ],
+        "webhookId": "199ebec3-ef73-4c7d-b903-1996aae3a633",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "73FQ8r7lzSZjobXf",
+            "name": "Gmail account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Gmail Trigger": {
+        "main": [
+          [
+            {
+              "node": "Extract with Gemma",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse AI Output": {
+        "main": [
+          [
+            {
+              "node": "Is Notary Request?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is Notary Request?": {
+        "main": [
+          [
+            {
+              "node": "Notify Dain",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Auto-Reply to Client",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract with Gemma": {
+        "main": [
+          [
+            {
+              "node": "Parse AI Output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "DAIN BENTLEY",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-03-06T14:10:08.825Z",
+        "id": 86,
+        "workflowId": "JbekZR8r1ebXe16n",
+        "versionId": "7dd2d500-087e-4bd8-b253-786ca2780090",
+        "event": "deactivated",
+        "userId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
+      },
+      {
+        "createdAt": "2026-03-06T14:10:00.709Z",
+        "id": 84,
+        "workflowId": "JbekZR8r1ebXe16n",
+        "versionId": "7dd2d500-087e-4bd8-b253-786ca2780090",
+        "event": "deactivated",
+        "userId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
+      },
+      {
+        "createdAt": "2026-03-06T14:10:01.300Z",
+        "id": 85,
+        "workflowId": "JbekZR8r1ebXe16n",
+        "versionId": "7dd2d500-087e-4bd8-b253-786ca2780090",
+        "event": "activated",
+        "userId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
+      },
+      {
+        "createdAt": "2026-03-06T14:10:09.379Z",
+        "id": 87,
+        "workflowId": "JbekZR8r1ebXe16n",
+        "versionId": "7dd2d500-087e-4bd8-b253-786ca2780090",
+        "event": "activated",
+        "userId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
+      }
+    ]
+  },
+  "_backup_source": "local_file",
+  "_backup_filename": "notary_request_intake_gemma_local.json"
+}

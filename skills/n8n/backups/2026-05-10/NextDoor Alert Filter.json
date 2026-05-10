@@ -1,0 +1,757 @@
+{
+  "updatedAt": "2026-03-30T13:33:26.825Z",
+  "createdAt": "2026-03-11T19:37:43.930Z",
+  "id": "LywRjysHEqXPNN2B",
+  "name": "NextDoor Alert Filter",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "schedule",
+      "name": "Schedule Every 30 Min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "gmail-fetch",
+      "name": "Get NextDoor Emails",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        200,
+        0
+      ],
+      "parameters": {
+        "operation": "getAll",
+        "limit": 50,
+        "simple": true,
+        "filters": {
+          "q": "from:nextdoor.com in:inbox is:unread"
+        }
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "73FQ8r7lzSZjobXf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "id": "filter-logic",
+      "name": "Filter Alerts vs Trash",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ],
+      "parameters": {
+        "jsCode": "\nconst result = [];\n\nfor (const email of $input.all()) {\n    const subject = (email.json.subject || '').toLowerCase();\n    const body = (email.json.snippet || email.json.textPlain || '').toLowerCase();\n    \n    const isAlert = subject.includes('alert') || body.includes('alert') || \n        subject.includes('fraud') || body.includes('fraud') ||\n        subject.includes('crime') || body.includes('crime') ||\n        subject.includes('police') || body.includes('police') ||\n        subject.includes('stolen') || body.includes('stolen') ||\n        subject.includes('warning') || body.includes('warning');\n    \n    result.push({ json: { ...email.json, _isAlert: isAlert } });\n}\n\nif (result.length === 0) {\n    return [{ json: { _isAlert: false, _empty: true } }];\n}\n\nreturn result;\n"
+      }
+    },
+    {
+      "id": "telegram-alert",
+      "name": "Alert Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1080,
+        -100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={ \"chat_id\": \"8305133249\", \"text\": \"\ud83d\udea8 *NextDoor Alert* \ud83d\udea8\\n\\n*Subject:* {{ $json.subject }}\\n*Preview:* {{ $json.snippet }}\\n\\n[View in Gmail](https://mail.google.com/mail/u/0/#inbox/{{ $json.messageId }})\", \"parse_mode\": \"Markdown\" }",
+        "options": {}
+      }
+    },
+    {
+      "id": "gmail-trash",
+      "name": "Move to Trash",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        600,
+        100
+      ],
+      "parameters": {
+        "operation": "update",
+        "messageId": "={{ $json.messageId }}",
+        "updateFields": {
+          "removeLabelIds": [
+            "INBOX"
+          ],
+          "addLabelIds": [
+            "TRASH"
+          ]
+        }
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "73FQ8r7lzSZjobXf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "id": "gmail-mark-read-alerts",
+      "name": "Mark Alert Read",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        -100
+      ],
+      "parameters": {
+        "operation": "update",
+        "messageId": "={{ $json.messageId }}",
+        "updateFields": {
+          "removeLabelIds": [
+            "UNREAD"
+          ]
+        }
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "73FQ8r7lzSZjobXf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "id": "split-route",
+      "name": "Route Alert or Trash",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        640,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "is-alert",
+              "leftValue": "={{ $json._isAlert }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "nd-check-sent",
+      "name": "Already Alerted?",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        600,
+        -100
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT id FROM sent_nextdoor_alerts WHERE message_id = '{{ $json.id }}' LIMIT 1;"
+      },
+      "credentials": {
+        "mySql": {
+          "id": "vZlctd4g664kyvko",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "id": "nd-is-new",
+      "name": "Is New Alert?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        840,
+        -100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "empty-check",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "nd-mark-sent",
+      "name": "Mark Alerted",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        1320,
+        -100
+      ],
+      "parameters": {
+        "operation": "insert",
+        "table": {
+          "value": "sent_nextdoor_alerts",
+          "__rl": true,
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "values": [
+            {
+              "column": "message_id",
+              "type": "string",
+              "value": "={{ $('Route Alert or Trash').item.json.id }}"
+            },
+            {
+              "column": "subject",
+              "type": "string",
+              "value": "={{ $('Route Alert or Trash').item.json.subject }}"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "mySql": {
+          "id": "vZlctd4g664kyvko",
+          "name": "MySQL account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Every 30 Min": {
+      "main": [
+        [
+          {
+            "node": "Get NextDoor Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get NextDoor Emails": {
+      "main": [
+        [
+          {
+            "node": "Filter Alerts vs Trash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Alerts vs Trash": {
+      "main": [
+        [
+          {
+            "node": "Route Alert or Trash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert Telegram": {
+      "main": [
+        [
+          {
+            "node": "Mark Alerted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Alert or Trash": {
+      "main": [
+        [
+          {
+            "node": "Already Alerted?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Move to Trash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Already Alerted?": {
+      "main": [
+        [
+          {
+            "node": "Is New Alert?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New Alert?": {
+      "main": [
+        [
+          {
+            "node": "Alert Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Every 30 Min": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "4dd70e3a-443b-46e1-8bce-5c2e75c4f0ee",
+  "activeVersionId": "4dd70e3a-443b-46e1-8bce-5c2e75c4f0ee",
+  "versionCounter": 23,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-03-11T19:37:43.930Z",
+      "createdAt": "2026-03-11T19:37:43.930Z",
+      "role": "workflow:owner",
+      "workflowId": "LywRjysHEqXPNN2B",
+      "projectId": "5DJBfZzzizP5frZB",
+      "project": {
+        "updatedAt": "2026-03-06T04:53:21.134Z",
+        "createdAt": "2026-03-06T04:52:56.613Z",
+        "id": "5DJBfZzzizP5frZB",
+        "name": "DAIN BENTLEY <dain.bentley@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-03-30T13:33:26.827Z",
+    "createdAt": "2026-03-30T13:33:26.827Z",
+    "versionId": "4dd70e3a-443b-46e1-8bce-5c2e75c4f0ee",
+    "workflowId": "LywRjysHEqXPNN2B",
+    "nodes": [
+      {
+        "id": "schedule",
+        "name": "Schedule Every 30 Min",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 30
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "gmail-fetch",
+        "name": "Get NextDoor Emails",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1,
+        "position": [
+          200,
+          0
+        ],
+        "parameters": {
+          "operation": "getAll",
+          "limit": 50,
+          "simple": true,
+          "filters": {
+            "q": "from:nextdoor.com in:inbox is:unread"
+          }
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "73FQ8r7lzSZjobXf",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "id": "filter-logic",
+        "name": "Filter Alerts vs Trash",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          400,
+          0
+        ],
+        "parameters": {
+          "jsCode": "\nconst result = [];\n\nfor (const email of $input.all()) {\n    const subject = (email.json.subject || '').toLowerCase();\n    const body = (email.json.snippet || email.json.textPlain || '').toLowerCase();\n    \n    const isAlert = subject.includes('alert') || body.includes('alert') || \n        subject.includes('fraud') || body.includes('fraud') ||\n        subject.includes('crime') || body.includes('crime') ||\n        subject.includes('police') || body.includes('police') ||\n        subject.includes('stolen') || body.includes('stolen') ||\n        subject.includes('warning') || body.includes('warning');\n    \n    result.push({ json: { ...email.json, _isAlert: isAlert } });\n}\n\nif (result.length === 0) {\n    return [{ json: { _isAlert: false, _empty: true } }];\n}\n\nreturn result;\n"
+        }
+      },
+      {
+        "id": "telegram-alert",
+        "name": "Alert Telegram",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1080,
+          -100
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8544365014:AAEgKwHUF7_iG2AizJND2NuOUouPE4uQymQ/sendMessage",
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={ \"chat_id\": \"8305133249\", \"text\": \"\ud83d\udea8 *NextDoor Alert* \ud83d\udea8\\n\\n*Subject:* {{ $json.subject }}\\n*Preview:* {{ $json.snippet }}\\n\\n[View in Gmail](https://mail.google.com/mail/u/0/#inbox/{{ $json.messageId }})\", \"parse_mode\": \"Markdown\" }",
+          "options": {}
+        }
+      },
+      {
+        "id": "gmail-trash",
+        "name": "Move to Trash",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1,
+        "position": [
+          600,
+          100
+        ],
+        "parameters": {
+          "operation": "update",
+          "messageId": "={{ $json.messageId }}",
+          "updateFields": {
+            "removeLabelIds": [
+              "INBOX"
+            ],
+            "addLabelIds": [
+              "TRASH"
+            ]
+          }
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "73FQ8r7lzSZjobXf",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "id": "gmail-mark-read-alerts",
+        "name": "Mark Alert Read",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1,
+        "position": [
+          800,
+          -100
+        ],
+        "parameters": {
+          "operation": "update",
+          "messageId": "={{ $json.messageId }}",
+          "updateFields": {
+            "removeLabelIds": [
+              "UNREAD"
+            ]
+          }
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "73FQ8r7lzSZjobXf",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "id": "split-route",
+        "name": "Route Alert or Trash",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          640,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "is-alert",
+                "leftValue": "={{ $json._isAlert }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "nd-check-sent",
+        "name": "Already Alerted?",
+        "type": "n8n-nodes-base.mySql",
+        "typeVersion": 2.4,
+        "position": [
+          600,
+          -100
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "=SELECT id FROM sent_nextdoor_alerts WHERE message_id = '{{ $json.id }}' LIMIT 1;"
+        },
+        "credentials": {
+          "mySql": {
+            "id": "vZlctd4g664kyvko",
+            "name": "MySQL account"
+          }
+        }
+      },
+      {
+        "id": "nd-is-new",
+        "name": "Is New Alert?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          840,
+          -100
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "empty-check",
+                "leftValue": "={{ $json.id }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "nd-mark-sent",
+        "name": "Mark Alerted",
+        "type": "n8n-nodes-base.mySql",
+        "typeVersion": 2.4,
+        "position": [
+          1320,
+          -100
+        ],
+        "parameters": {
+          "operation": "insert",
+          "table": {
+            "value": "sent_nextdoor_alerts",
+            "__rl": true,
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "values": [
+              {
+                "column": "message_id",
+                "type": "string",
+                "value": "={{ $('Route Alert or Trash').item.json.id }}"
+              },
+              {
+                "column": "subject",
+                "type": "string",
+                "value": "={{ $('Route Alert or Trash').item.json.subject }}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "mySql": {
+            "id": "vZlctd4g664kyvko",
+            "name": "MySQL account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Schedule Every 30 Min": {
+        "main": [
+          [
+            {
+              "node": "Get NextDoor Emails",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get NextDoor Emails": {
+        "main": [
+          [
+            {
+              "node": "Filter Alerts vs Trash",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter Alerts vs Trash": {
+        "main": [
+          [
+            {
+              "node": "Route Alert or Trash",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Alert Telegram": {
+        "main": [
+          [
+            {
+              "node": "Mark Alerted",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Route Alert or Trash": {
+        "main": [
+          [
+            {
+              "node": "Already Alerted?",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Move to Trash",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Already Alerted?": {
+        "main": [
+          [
+            {
+              "node": "Is New Alert?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is New Alert?": {
+        "main": [
+          [
+            {
+              "node": "Alert Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      }
+    },
+    "authors": "DAIN BENTLEY",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-03-30T13:33:26.918Z",
+        "id": 249,
+        "workflowId": "LywRjysHEqXPNN2B",
+        "versionId": "4dd70e3a-443b-46e1-8bce-5c2e75c4f0ee",
+        "event": "deactivated",
+        "userId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
+      },
+      {
+        "createdAt": "2026-03-30T13:33:26.963Z",
+        "id": 250,
+        "workflowId": "LywRjysHEqXPNN2B",
+        "versionId": "4dd70e3a-443b-46e1-8bce-5c2e75c4f0ee",
+        "event": "activated",
+        "userId": "c557a393-301d-4cd5-ada0-4ae8574f88c9"
+      }
+    ]
+  },
+  "_backup_source": "local_file",
+  "_backup_filename": "nextdoor_alert_filter.json"
+}
