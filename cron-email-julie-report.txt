@@ -1,0 +1,19 @@
+CRON REPORT: VIP Email Check (Julie) - 2026-05-07 03:25 UTC
+================================================================
+
+STATUS: FAILED - OAuth token expired
+
+DETAILS:
+- Task: Check for unread emails from julie.a.siegel84@gmail.com in last hour
+- Time: Wednesday, May 6, 2026 11:25 PM EST
+- Error: "invalid_grant" - Token has been expired or revoked
+- Command attempted: gog gmail messages search "in:inbox from:julie.a.siegel84@gmail.com is:unread newer_than:1h" --max 5 --json
+- gog account: dain.bentley@gmail.com
+- Keyring backend: file
+
+ACTION NEEDED:
+Interactive OAuth re-authentication required for gog Gmail access.
+Run: gog auth login
+Then visit: http://127.0.0.1:45995 (or wait for browser to open)
+
+NEXT CHECK: Will run at next scheduled interval (cron:2751411b-5c4a-4204-ad15-4ba4c599cee3)

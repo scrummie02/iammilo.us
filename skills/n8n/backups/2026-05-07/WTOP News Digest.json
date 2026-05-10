@@ -1,0 +1,206 @@
+{
+  "updatedAt": "2026-04-28T12:47:11.702Z",
+  "createdAt": "2026-04-28T12:47:11.702Z",
+  "id": "RtPIlvD8CBMifOm8",
+  "name": "WTOP News Digest",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        },
+        "options": {
+          "timeZone": "America/New_York",
+          "startDateTime": "2026-04-29T06:00:00.000Z"
+        }
+      },
+      "id": "schedule-trigger-01",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://wtop.com/feed/",
+        "options": {}
+      },
+      "id": "http-request-01",
+      "name": "Fetch WTOP RSS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "model": "ollama/gemma4:26b",
+        "options": {
+          "maxTokens": 2048
+        }
+      },
+      "id": "openai-chat-model-01",
+      "name": "Local AI Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        200,
+        500
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "local-ollama-cred",
+          "name": "Ollama (Local)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extract the news items from this RSS feed XML. For each item, provide ONLY the Title and the Link.\n\nFormat the output as a clean Markdown list like this:\n- [Headline Title](Direct URL)\n\nDo NOT include:\n- Descriptions\n- Images\n- Dates\n- Authors\n- Any XML tags or metadata\n\nHere is the RSS content:\n{{ $json.data }}",
+        "options": {
+          "systemMessage": "You are a news summarizer. Your only job is to extract headlines and URLs from RSS XML and format them as a clean Markdown list of links. Be concise and accurate."
+        }
+      },
+      "id": "agent-node-01",
+      "name": "Parse Headlines",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "channelId": "1496187939552628826",
+        "text": "={{ $json.output }}"
+      },
+      "id": "discord-node-01",
+      "name": "Send to Discord",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ],
+      "credentials": {
+        "discordBotApi": {
+          "id": "discord-cred-01",
+          "name": "Discord Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## WTOP News Workflow\n- **Trigger:** Daily at 6:00 AM EST\n- **Source:** WTOP RSS Feed\n- **Processing:** Local AI (gemma4:26b - DO NOT CHANGE)\n- **Output:** Discord Channel",
+        "height": 500,
+        "width": 400
+      },
+      "id": "sticky-note-01",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -500,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Discord Setup\n- Add your Discord Bot credentials\n- Set Channel ID to: 1496187939552628826\n\n## Ollama Credential (IMPORTANT)\n- Base URL: http://192.168.200.242:11434/v1\n- Model: gemma4:26b (DO NOT CHANGE)",
+        "height": 200,
+        "width": 300
+      },
+      "id": "sticky-note-discord",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        500,
+        100
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch WTOP RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch WTOP RSS": {
+      "main": [
+        [
+          {
+            "node": "Parse Headlines",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Local AI Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Parse Headlines",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Headlines": {
+      "main": [
+        [
+          {
+            "node": "Send to Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "62ffb13b-76e9-4179-83af-26db2461e124",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-04-28T12:47:11.702Z",
+      "createdAt": "2026-04-28T12:47:11.702Z",
+      "role": "workflow:owner",
+      "workflowId": "RtPIlvD8CBMifOm8",
+      "projectId": "RKVy2puwggBotitw"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}

@@ -1,0 +1,1 @@
+{"status":"auth_failed","email":"julie.a.siegel84@gmail.com","error":"OAuth token expired for info@dainbentley.com","resolution":"Run: gog auth add info@dainbentley.com --services gmail --manual --force-consent","timestamp":"2026-05-08T11:36:00Z","next_action":"dain_needs_to_reauth"}

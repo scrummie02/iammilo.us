@@ -1,0 +1,15 @@
+[Unit]
+Description=MILO Fleet Dashboard Refresh Daemon
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/linuxbrew/.linuxbrew/bin/python3 /home/dain/.openclaw/workspace/scripts/dashboard_daemon.py start
+ExecStop=/home/linuxbrew/.linuxbrew/bin/python3 /home/dain/.openclaw/workspace/scripts/dashboard_daemon.py stop
+Restart=always
+RestartSec=10
+User=dain
+WorkingDirectory=/home/dain/.openclaw/workspace
+
+[Install]
+WantedBy=default.target

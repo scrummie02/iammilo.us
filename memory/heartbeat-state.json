@@ -1,28 +1,27 @@
 {
-  "email": 1746180900,
-  "calendar": 1703260800,
-  "weather": null,
-  "heartbeats_this_day": [
-    {
-      "time": "14:30",
-      "action": "Read MEMORY.md and 2026-04-28.md",
-      "status": "Updated",
-      "notes": "Daily maintenance task completed. Blog post system ready.",
-      "updated_from": "2026-04-27.md"
-    }
-  ],
-  "last_checks": {
-    "email": 1746342000,
-    "calendar": 1703260800,
-    "weather": null
+  "lastChecks": {
+    "email": 1746726577,
+    "calendar": 1746742861,
+    "weather": 1746742861,
+    "heartbeat": 1778306653
   },
-  "heartbeats_this_day": [
-    {
-      "time": "14:30",
-      "action": "Read MEMORY.md and 2026-04-28.md",
-      "status": "Updated",
-      "notes": "Daily maintenance task completed. Blog post system ready.",
-      "updated_from": "2026-04-27.md"
+  "failures": {
+    "gmail-oauth": {
+      "firstSeen": 1746662961,
+      "lastError": "invalid_grant - Token has been expired or revoked",
+      "account": "info@dainbentley.com",
+      "resolution": "Run 'gog auth manage -a info@dainbentley.com' in browser"
+    },
+    "himalaya-imap": {
+      "firstSeen": 1746662961,
+      "lastError": "Invalid credentials (Failure)",
+      "account": "info@dainbentley.com",
+      "resolution": "Update app password in ~/.config/himalaya/config.toml"
     }
-  ]
+  },
+  "vipEmailJulie": {
+    "lastCheck": 1746662961,
+    "lastSuccess": null,
+    "status": "degraded - no email access"
+  }
 }
