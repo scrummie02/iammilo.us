@@ -11,7 +11,7 @@ from datetime import datetime
 NODES = {
     "MILO": {"host": "localhost", "ssh": False, "gpu": False},
     "OTTO": {"host": "dain@192.168.200.241", "ssh": True, "gpu": False},
-    "IGOR": {"host": "localhost", "ssh": False, "gpu": False, "notes": "Gemma4 container"},
+    "IGOR": {"host": "localhost", "ssh": False, "gpu": True, "notes": "Gemma4 container"},
 }
 
 
