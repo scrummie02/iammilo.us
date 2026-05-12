@@ -1,0 +1,6 @@
+2026-05-11 22:44 UTC - VIP Email Check Failed
+
+Issue: gog authentication expired for Gmail (dain.bentley@gmail.com)
+Impact: Cannot check for unread emails from Julie (julie.a.siegel84@gmail.com)
+
+Resolution: Run `gog auth add dain.bentley@gmail.com --services gmail` to re-authenticate

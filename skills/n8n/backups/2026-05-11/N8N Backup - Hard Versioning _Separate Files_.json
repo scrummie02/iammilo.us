@@ -1,0 +1,176 @@
+{
+  "updatedAt": "2026-04-13T00:59:02.607Z",
+  "createdAt": "2026-04-13T00:58:35.870Z",
+  "id": "bVIUBpjkBwonTpDI",
+  "name": "N8N Backup - Hard Versioning (Separate Files)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 2 * * *"
+            }
+          ]
+        }
+      },
+      "id": "12a6a23d-c639-404f-b036-61e86a05d3d0",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "filters": {},
+        "requestOptions": {}
+      },
+      "id": "57faee8e-1f62-4c0c-b22c-e6f678d2135f",
+      "name": "Get All Workflows",
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -176
+      ],
+      "credentials": {
+        "n8nApi": {
+          "id": "Tl7n4HrpONVqZBsZ",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nconst lastUpdates = staticData.lastUpdates || {};\nconst newUpdates = {};\nconst changedFlows = [];\n\nconst now = new Date();\nconst timestamp = now.toISOString().split('T')[0] + '_' + now.getHours() + '-' + now.getMinutes();\n\nfor (const flow of $input.all()) {\n    const id = flow.json.id;\n    const currentUpdate = flow.json.updatedAt;\n\n    if (!lastUpdates[id] || lastUpdates[id] !== currentUpdate) {\n        changedFlows.push({\n            json: {\n                fileName: `${flow.json.name.replace(/[/\\\\?%*:|\"<>]/g, '-')}_${timestamp}.json`,\n                content: JSON.stringify(flow.json, null, 2)\n            }\n        });\n    }\n    newUpdates[id] = currentUpdate;\n}\n\nstaticData.lastUpdates = newUpdates;\nreturn changedFlows;"
+      },
+      "id": "f8e1e9eb-c56d-49c0-8b9d-423fd356ce90",
+      "name": "Check for Changes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "fileName": "={{ $json.fileName }}"
+        }
+      },
+      "id": "7bc0f974-82e8-42b9-b09e-3a30620b78dd",
+      "name": "Convert to File",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1,
+      "position": [
+        464,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "=1e8LV6PB9Qdq9gP4U74r0ZhXQVg7Yrk2X",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "cc84646b-a3d5-4b8b-afa0-ba8e1d572fee",
+      "name": "Google Drive Upload",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        720,
+        -176
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "xLW1PPLT8bFxbaj0",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get All Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Workflows": {
+      "main": [
+        [
+          {
+            "node": "Check for Changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for Changes": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Google Drive Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "8da88f81-2264-483c-927e-7fb232b646e1",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-04-13T00:58:35.870Z",
+      "createdAt": "2026-04-13T00:58:35.870Z",
+      "role": "workflow:owner",
+      "workflowId": "bVIUBpjkBwonTpDI",
+      "projectId": "RKVy2puwggBotitw"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
