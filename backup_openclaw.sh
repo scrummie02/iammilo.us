@@ -25,18 +25,25 @@ else
 fi
 
 # Sync workspace
-rsync -av --delete \
+rsync -a --delete \
   "$WORKSPACE/" \
   "$DEST/workspace/" \
   --exclude=".git" \
   --exclude="__pycache__" \
-  --exclude="*.pyc"
+  --exclude="*.pyc" \
+  --exclude="target/" \
+  --exclude="node_modules/" \
+  --exclude=".venv/" \
+  --exclude="venv/" \
+  --exclude="*.tar" \
+  --exclude="*.tar.gz" \
+  --exclude="*.zip"
 
 # Back up session logs (chat history)
-rsync -av \
+rsync -a \
   "/home/dain/.openclaw/agents/main/sessions/" \
   "$DEST/sessions/" \
-  --include="*.jsonl"
+  --include="*.jsonl" --exclude="*"
 
 # Back up cron config
 openclaw cron list --json > "$DEST/cron_backup_${TIMESTAMP}.json" 2>/dev/null

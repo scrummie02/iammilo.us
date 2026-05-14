@@ -12,13 +12,21 @@ TIME_SLOT=$(date +%H)
 API_KEY="${N8N_API_KEY:-}"
 BASE_URL="${N8N_BASE_URL:-http://localhost:5678}"
 
+# OpenClaw settings fallback
+if [[ -z "$API_KEY" ]] && [[ -f /home/dain/.openclaw/openclaw.json ]]; then
+    API_KEY=$(jq -r '.env.N8N_API_KEY // empty' /home/dain/.openclaw/openclaw.json 2>/dev/null || true)
+fi
+if [[ -z "$BASE_URL" ]] && [[ -f /home/dain/.openclaw/openclaw.json ]]; then
+    BASE_URL=$(jq -r '.env.N8N_BASE_URL // empty' /home/dain/.openclaw/openclaw.json 2>/dev/null || true)
+fi
+
 # Fallback: try to read from 1password if env vars not set
 if [[ -z "$API_KEY" ]] && command -v op &>/dev/null; then
     API_KEY=$(op read "op://Private/n8n-api/credential" 2>/dev/null || true)
 fi
 
 if [[ -z "$API_KEY" ]]; then
-    echo "❌ N8N_API_KEY not set and could not read from 1Password" >&2
+    echo "❌ N8N_API_KEY not set" >&2
     exit 1
 fi
 
@@ -26,9 +34,37 @@ mkdir -p "$BACKUP_DIR"
 
 # Fetch all workflows
 echo "📡 Fetching workflows from $BASE_URL..."
+# Diagnostic: print first/last 10 chars of API key for debugging (never log full key)
+KEY_LEN=${#API_KEY}
+if [[ $KEY_LEN -gt 20 ]]; then
+    echo "🔑 API key length: $KEY_LEN chars"
+else
+    echo "⚠️ API key seems short ($KEY_LEN chars)"
+fi
 RESPONSE=$(curl -sf \
     "${BASE_URL}/api/v1/workflows" \
-    -H "X-N8N-API-KEY: ${API_KEY}")
+    -H "X-N8N-API-KEY: ${API_KEY}" 2>&1) || {
+    echo "❌ API call failed. Response:"
+    echo "$RESPONSE"
+    curl -sf \
+        "${BASE_URL}/api/v1/workflows" \
+        -H "X-N8N-API-KEY: ${API_KEY}" \
+        -w "\nHTTP_CODE: %{http_code}\n" 2>/dev/null || true
+    exit 1
+}
+
+# Verify response is valid JSON with data
+if ! echo "$RESPONSE" | jq empty &>/dev/null; then
+    echo "❌ API response is not valid JSON. Raw response:"
+    echo "$RESPONSE"
+    exit 1
+fi
+
+if ! echo "$RESPONSE" | jq -e '.data' &>/dev/null; then
+    echo "❌ API response missing 'data' field. Response:"
+    echo "$RESPONSE"
+    exit 1
+fi
 
 WORKFLOW_COUNT=$(echo "$RESPONSE" | jq '.data | length')
 echo "📊 Found $WORKFLOW_COUNT workflows"
