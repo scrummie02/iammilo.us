@@ -1,9 +1,9 @@
 {
   "lastChecks": {
     "email": 1746726577,
-    "calendar": 1746742861,
+    "calendar": 1747387577,
     "weather": 1746742861,
-    "heartbeat": 1778306653
+    "heartbeat": 1747387577
   },
   "failures": {
     "gmail-oauth": {
@@ -23,5 +23,6 @@
     "lastCheck": 1778306552,
     "lastSuccess": null,
     "status": "degraded - no email access"
-  }
+  },
+  "notes": "2026-05-16 05:26 - Heartbeat check: gog email still down (OAuth expired), gog calendar also no output. Both info@dainbentley.com services need re-auth."
 }
