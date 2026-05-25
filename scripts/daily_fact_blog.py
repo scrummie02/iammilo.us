@@ -1,47 +1,28 @@
 #!/usr/bin/env python3
 """
 Daily Fact Blog Publisher
-Generates a daily fact via Gemini, pushes to milo_blog container,
-updates index.html and archive.html.
+Generates a daily fact via Gemini, writes to local blog files under
+/home/dain/.openclaw/workspace/blog/
 """
-import requests, base64, tarfile, io, json
+import requests, json
 from datetime import datetime
 
 GEMINI_KEY = "AIzaSyAnnVmRDJTCRGKBvM80tEGpKmBa-f0CFpY"
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key={GEMINI_KEY}"
-PORTAINER = "http://192.168.200.220:9000"
-PTR_KEY = "ptr_jVGvpkWmxmPusWm3yZYeEvMU8LLMvYjqDm8iLmsRQjk="
-ENDPOINT = 7
-CONTAINER_ID = "229d7e527e84"
+BLOG_DIR = "/home/dain/.openclaw/workspace/blog"
+POSTS_DIR = f"{BLOG_DIR}/posts"
 
 def gemini(prompt):
     res = requests.post(GEMINI_URL, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=30)
     return res.json()['candidates'][0]['content']['parts'][0]['text'].strip()
 
-def push_tar(files_dict, dest_dir):
-    """Push multiple files to container via tar upload."""
-    buf = io.BytesIO()
-    with tarfile.open(fileobj=buf, mode='w') as tar:
-        for name, content in files_dict.items():
-            data = content.encode('utf-8')
-            info = tarfile.TarInfo(name=name)
-            info.size = len(data)
-            tar.addfile(info, io.BytesIO(data))
-    buf.seek(0)
-    url = f"{PORTAINER}/api/endpoints/{ENDPOINT}/docker/containers/{CONTAINER_ID}/archive?path={dest_dir}"
-    res = requests.put(url, headers={"X-API-Key": PTR_KEY, "Content-Type": "application/x-tar"}, data=buf)
-    return res.status_code
+def read_file(path):
+    with open(path, 'r', encoding='utf-8') as f:
+        return f.read()
 
-def get_file(path):
-    headers = {"X-API-Key": PTR_KEY, "Content-Type": "application/json"}
-    exec_url = f"{PORTAINER}/api/endpoints/{ENDPOINT}/docker/containers/{CONTAINER_ID}/exec"
-    res = requests.post(exec_url, headers=headers, json={"AttachStdout": True, "Cmd": ["cat", path]})
-    exec_id = res.json()["Id"]
-    r = requests.post(f"{PORTAINER}/api/endpoints/{ENDPOINT}/docker/exec/{exec_id}/start",
-                      headers=headers, json={"Detach": False, "Tty": False})
-    content = r.text
-    start = content.find('<!DOCTYPE html>')
-    return content[start:] if start != -1 else content
+def write_file(path, content):
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(content)
 
 # 1. Generate fact
 fact = gemini("Give me one genuinely interesting, obscure, or surprising fact. Keep it to 2-3 sentences max. No intro, just the fact.")
@@ -84,31 +65,51 @@ post_html = f"""<!DOCTYPE html>
 </body>
 </html>"""
 
-# 4. Push the new post
-status = push_tar({filename: post_html}, "/usr/share/nginx/html/posts/")
-print(f"Post pushed: {status}")
+# 4. Write the new post
+write_file(f"{POSTS_DIR}/{filename}", post_html)
+print(f"Post written: {POSTS_DIR}/{filename}")
 
 # 5. Update index.html
-index_html = get_file("/usr/share/nginx/html/index.html")
+index_html = read_file(f"{BLOG_DIR}/index.html")
 
-# Inject into Latest Logs
-latest_logs_marker = "<h2>> Latest_Logs</h2>"
-if latest_logs_marker in index_html and filename not in index_html:
-    new_log_entry = f'\n  <div class="post-item">\n    <div class="post-date">{date_str}</div>\n    <a href="/posts/{filename}">Daily Fact</a>\n  </div>'
-    index_html = index_html.replace(latest_logs_marker, latest_logs_marker + new_log_entry)
+# Inject into Latest Logs (before the closing </div> of #posts)
+posts_end_marker = '</div>\n\n<footer>'
+if filename not in index_html and posts_end_marker in index_html:
+    new_log_entry = f"""<div class="post">
+<div class="post-date">{display_date}</div>
+<div class="post-title"><a href="/posts/{filename}">Daily Fact</a></div>
+<div class="post-excerpt">{fact[:120]}{'...' if len(fact) > 120 else ''}</div>
+</div>
 
-status = push_tar({"index.html": index_html}, "/usr/share/nginx/html/")
-print(f"Index updated: {status}")
+"""
+    index_html = index_html.replace(posts_end_marker, new_log_entry + posts_end_marker)
+    write_file(f"{BLOG_DIR}/index.html", index_html)
+    print("Index updated.")
+else:
+    print("Index not updated (already present or marker not found).")
 
 # 6. Update archive.html
-archive_html = get_file("/usr/share/nginx/html/archive.html")
-# Inject into JavaScript 'posts' array
-posts_array_start = archive_html.find("const posts = [")
-if posts_array_start != -1:
-    new_post_obj = '\n  {{file:"{}",title:"Daily Fact",date:"{}",tags:["daily-fact","trivia"]}},'.format(filename, date_str)
-    archive_html = archive_html[:posts_array_start+15] + new_post_obj + archive_html[posts_array_start+15:]
-    
-    status = push_tar({"archive.html": archive_html}, "/usr/share/nginx/html/")
-    print(f"Archive updated: {status}")
+archive_html = read_file(f"{BLOG_DIR}/archive.html")
+# Find the first archive-entry div and insert before it
+archive_marker = '<div class="archive-entry">'
+year_marker = '<div class="year">2026</div>'
+if filename not in archive_html and archive_marker in archive_html:
+    # Insert after the year marker if present, or before first archive-entry
+    insert_point = archive_html.find(year_marker)
+    if insert_point != -1:
+        insert_after = archive_html.find('\n\n', insert_point)
+        if insert_after != -1:
+            new_entry = f'\n\n<div class="archive-entry">\n<span class="archive-date">{now.strftime("%B %d")}</span> — <a href="/posts/{filename}" class="archive-title">Daily Fact</a>\n</div>'
+            archive_html = archive_html[:insert_after] + new_entry + archive_html[insert_after:]
+            write_file(f"{BLOG_DIR}/archive.html", archive_html)
+            print("Archive updated.")
+        else:
+            print("Archive not updated (insert point ambiguous).")
+    else:
+        print("Archive not updated (year marker not found).")
+elif filename in archive_html:
+    print("Archive not updated (already present).")
+else:
+    print("Archive not updated (archive-entry not found).")
 
 print("Done.")
