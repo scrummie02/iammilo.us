@@ -85,6 +85,18 @@ def get_remote_mem(host):
         return 0
 
 
+def get_remote_gpu(host):
+    """Fetch remote GPU utilization via nvidia-smi."""
+    out = ssh_cmd(host, "nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null || echo N/A")
+    try:
+        val = out.strip()
+        if val == "N/A":
+            return None
+        return int(float(val))
+    except Exception:
+        return None
+
+
 def get_node_status(name, cfg):
     if cfg.get("ssh"):
         out = ssh_cmd(cfg["host"], "uptime 2>/dev/null")
@@ -99,18 +111,6 @@ def get_node_status(name, cfg):
         gpu = get_local_gpu() if cfg.get("gpu") else None
 
     return {"status": "Online", "cpu": cpu, "mem": mem, "gpu": gpu}
-
-
-def get_remote_gpu(host):
-    """Fetch remote GPU utilization via nvidia-smi."""
-    out = ssh_cmd(host, "nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null || echo N/A")
-    try:
-        val = out.strip()
-        if val == "N/A":
-            return None
-        return int(float(val))
-    except Exception:
-        return None
 
 
 def build_html(nodes_data, timestamp):
@@ -128,17 +128,24 @@ def build_html(nodes_data, timestamp):
         status_cls = data["status"]
         gpu_display = str(data["gpu"]) if data["gpu"] is not None else "N/A"
 
-        bar_cls = "fleet"
+        cpu_bar_cls = ""
         if data["cpu"] >= 80:
-            bar_cls = "critical"
+            cpu_bar_cls = "critical"
         elif data["cpu"] >= 60:
-            bar_cls = "warning"
+            cpu_bar_cls = "warning"
+
+        mem_bar_cls = ""
+        if data["mem"] >= 90:
+            mem_bar_cls = "critical"
+        elif data["mem"] >= 75:
+            mem_bar_cls = "warning"
 
         nodes_html += f"""        <div class="node {status_cls}">
             <h2>{name} <span class="status {status_cls}">{status_cls}</span></h2>
             <div class="stat-label"><span>CPU Usage</span><span class="stat-value">{data["cpu"]}</span></div>
-            <div class="stat-bar-container"><div class="stat-bar {bar_cls}" style="width: {data["cpu"]}%"></div></div>
+            <div class="stat-bar-container"><div class="stat-bar {cpu_bar_cls}" style="width: {data["cpu"]}%"></div></div>
             <div class="stat-label"><span>Memory Usage</span><span class="stat-value">{data["mem"]}</span></div>
+            <div class="stat-bar-container"><div class="stat-bar {mem_bar_cls}" style="width: {data["mem"]}%"></div></div>
             <div class="stat" style="margin-top: 10px; padding: 10px; background: #000; border-radius: 4px;">
                 <span style="color: #00ff00; font-size: 0.7em; text-transform: uppercase; font-weight: bold;">GPU Activity</span>
                 <br/>
@@ -151,38 +158,38 @@ def build_html(nodes_data, timestamp):
     avg_mem = round(sum(mems) / len(mems), 1) if mems else 0
     avg_gpu = round(sum(gpus) / len(gpus), 1) if gpus else 0.0
 
-    return f"""\u003c!DOCTYPE html\u003e
-\u003chtml\u003e
-\u003chead\u003e
-    \u003ctitle\u003eMILO Fleet Dashboard\u003c/title\u003e
-    \u003cmeta http-equiv="refresh" content="60"\u003e
-    \u003cstyle\u003ebody {{ background: #0a0a0a; color: #d1d1d1; font-family: Segoe UI, Tahoma, Geneva, Verdana, sans-serif; padding: 40px; line-height: 1.6; }} .nav {{ margin-bottom: 20px; }} .nav a {{ color: #00ff00; text-decoration: none; border: 1px solid #00ff00; padding: 8px 20px; border-radius: 4px; font-family: monospace; font-weight: bold; display: inline-block; }} .nav a:hover {{ background: #00ff00; color: #000; }} .header {{ border-bottom: 2px solid #00ff00; margin-bottom: 40px; padding-bottom: 10px; }} h1 {{ color: #00ff00; margin: 0; font-size: 2.5em; letter-spacing: 2px; }} .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }} .node {{ border: 1px solid #333; padding: 25px; border-radius: 12px; background: #121212; transition: transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }} .node:hover {{ transform: translateY(-5px); border-color: #00ff00; }} .node.Offline {{ border-color: #ff3333; opacity: 0.6; }} .fleet-summary {{ margin-top: 50px; padding: 30px; border: 2px solid #00ccff; border-radius: 12px; background: rgba(0, 204, 255, 0.05); }} h2 {{ margin-top: 0; color: #fff; font-size: 1.5em; display: flex; justify-content: space-between; align-items: center; }} .stat-bar-container {{ background: #222; border-radius: 4px; height: 12px; margin: 5px 0 15px 0; overflow: hidden; }} .stat-bar {{ height: 100%; background: #00ff00; transition: width 0.5s; }} .stat-bar.warning {{ background: #ffaa00; }} .stat-bar.critical {{ background: #ff3333; }} .stat-bar.fleet {{ background: #00ccff; }} .stat-label {{ display: flex; justify-content: space-between; font-size: 0.8em; text-transform: uppercase; color: #888; }} .stat-value {{ color: #fff; font-weight: bold; }} .status {{ font-size: 0.6em; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; }} .status.Online {{ background: #004400; color: #00ff00; }} .status.Offline {{ background: #440000; color: #ff3333; }} .footer {{ margin-top: 60px; color: #444; font-size: 0.8em; text-align: center; border-top: 1px solid #222; padding-top: 20px; }} \u003c/style\u003e\u003c/head\u003e
-\u003cbody\u003e
-    \u003cnav class="nav"\u003e\u003ca href="/index.html"\u003eHome\u003c/a\u003e\u003c/nav\u003e
-    \u003cdiv class="header"\u003e\u003ch1\u003eMILO FLEET OPERATIONS\u003c/h1\u003e\u003c/div\u003e
-    \u003cdiv class="grid"\u003e
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>MILO Fleet Dashboard</title>
+    <meta http-equiv="refresh" content="60">
+    <style>body {{ background: #0a0a0a; color: #d1d1d1; font-family: Segoe UI, Tahoma, Geneva, Verdana, sans-serif; padding: 40px; line-height: 1.6; }} .nav {{ margin-bottom: 20px; }} .nav a {{ color: #00ff00; text-decoration: none; border: 1px solid #00ff00; padding: 8px 20px; border-radius: 4px; font-family: monospace; font-weight: bold; display: inline-block; }} .nav a:hover {{ background: #00ff00; color: #000; }} .header {{ border-bottom: 2px solid #00ff00; margin-bottom: 40px; padding-bottom: 10px; }} h1 {{ color: #00ff00; margin: 0; font-size: 2.5em; letter-spacing: 2px; }} .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }} .node {{ border: 1px solid #333; padding: 25px; border-radius: 12px; background: #121212; transition: transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }} .node:hover {{ transform: translateY(-5px); border-color: #00ff00; }} .node.Offline {{ border-color: #ff3333; opacity: 0.6; }} .fleet-summary {{ margin-top: 50px; padding: 30px; border: 2px solid #00ccff; border-radius: 12px; background: rgba(0, 204, 255, 0.05); }} h2 {{ margin-top: 0; color: #fff; font-size: 1.5em; display: flex; justify-content: space-between; align-items: center; }} .stat-bar-container {{ background: #222; border-radius: 4px; height: 12px; margin: 5px 0 15px 0; overflow: hidden; }} .stat-bar {{ height: 100%; background: #00ff00; transition: width 0.5s; }} .stat-bar.warning {{ background: #ffaa00; }} .stat-bar.critical {{ background: #ff3333; }} .stat-bar.fleet {{ background: #00ccff; }} .stat-label {{ display: flex; justify-content: space-between; font-size: 0.8em; text-transform: uppercase; color: #888; }} .stat-value {{ color: #fff; font-weight: bold; }} .status {{ font-size: 0.6em; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; }} .status.Online {{ background: #004400; color: #00ff00; }} .status.Offline {{ background: #440000; color: #ff3333; }} .footer {{ margin-top: 60px; color: #444; font-size: 0.8em; text-align: center; border-top: 1px solid #222; padding-top: 20px; }} </style></head>
+<body>
+    <nav class="nav"><a href="/index.html">Home</a></nav>
+    <div class="header"><h1>MILO FLEET OPERATIONS</h1></div>
+    <div class="grid">
 {nodes_html}
-    \u003c/div\u003e
-    \u003cdiv class="fleet-summary"\u003e
-        \u003ch2 style="color: #00ccff; border-bottom: 1px solid #00ccff; padding-bottom: 10px; margin-bottom: 20px;"\u003eFLEET AGGREGATE LOAD\u003c/h2\u003e
-        \u003cdiv class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));"\u003e
-            \u003cdiv\u003e
-                \u003cdiv class="stat-label"\u003e\u003cspan\u003eAvg Fleet CPU\u003c/span\u003e\u003cspan class="stat-value" style="color: #00ccff;"\u003e{avg_cpu}\u003c/span\u003e\u003c/div\u003e
-                \u003cdiv class="stat-bar-container"\u003e\u003cdiv class="stat-bar fleet" style="width: {avg_cpu}%"\u003e\u003c/div\u003e\u003c/div\u003e
-            \u003c/div\u003e
-            \u003cdiv\u003e
-                \u003cdiv class="stat-label"\u003e\u003cspan\u003eAvg Fleet Mem\u003c/span\u003e\u003cspan class="stat-value" style="color: #00ccff;"\u003e{avg_mem}\u003c/span\u003e\u003c/div\u003e
-                \u003cdiv class="stat-bar-container"\u003e\u003cdiv class="stat-bar fleet" style="width: {avg_mem}%"\u003e\u003c/div\u003e\u003c/div\u003e
-            \u003c/div\u003e
-            \u003cdiv\u003e
-                \u003cdiv class="stat-label"\u003e\u003cspan\u003eAvg Fleet GPU\u003c/span\u003e\u003cspan class="stat-value" style="color: #00ccff;"\u003e{avg_gpu}\u003c/span\u003e\u003c/div\u003e
-                \u003cdiv class="stat-bar-container"\u003e\u003cdiv class="stat-bar fleet" style="width: {avg_gpu}%"\u003e\u003c/div\u003e\u003c/div\u003e
-            \u003c/div\u003e
-        \u003c/div\u003e
-    \u003c/div\u003e
-    \u003cdiv class="footer"\u003eSYSTEM TIMESTAMP: {timestamp} | AUTO-REFRESH: 60s\u003c/div\u003e
-\u003c/body\u003e
-\u003c/html\u003e"""
+    </div>
+    <div class="fleet-summary">
+        <h2 style="color: #00ccff; border-bottom: 1px solid #00ccff; padding-bottom: 10px; margin-bottom: 20px;">FLEET AGGREGATE LOAD</h2>
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div>
+                <div class="stat-label"><span>Avg Fleet CPU</span><span class="stat-value" style="color: #00ccff;">{avg_cpu}</span></div>
+                <div class="stat-bar-container"><div class="stat-bar fleet" style="width: {avg_cpu}%"></div></div>
+            </div>
+            <div>
+                <div class="stat-label"><span>Avg Fleet Mem</span><span class="stat-value" style="color: #00ccff;">{avg_mem}</span></div>
+                <div class="stat-bar-container"><div class="stat-bar fleet" style="width: {avg_mem}%"></div></div>
+            </div>
+            <div>
+                <div class="stat-label"><span>Avg Fleet GPU</span><span class="stat-value" style="color: #00ccff;">{avg_gpu}</span></div>
+                <div class="stat-bar-container"><div class="stat-bar fleet" style="width: {avg_gpu}%"></div></div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">SYSTEM TIMESTAMP: {timestamp} | AUTO-REFRESH: 60s</div>
+</body>
+</html>"""
 
 
 def main():
