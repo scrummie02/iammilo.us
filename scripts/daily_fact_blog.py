@@ -8,13 +8,18 @@ import requests, json
 from datetime import datetime
 
 GEMINI_KEY = "AIzaSyAnnVmRDJTCRGKBvM80tEGpKmBa-f0CFpY"
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key={GEMINI_KEY}"
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_KEY}"
 BLOG_DIR = "/home/dain/.openclaw/workspace/blog"
 POSTS_DIR = f"{BLOG_DIR}/posts"
 
 def gemini(prompt):
     res = requests.post(GEMINI_URL, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=30)
-    return res.json()['candidates'][0]['content']['parts'][0]['text'].strip()
+    data = res.json()
+    if 'error' in data:
+        raise RuntimeError(f"Gemini API error: {data['error'].get('message', data['error'])}")
+    if 'candidates' not in data or not data['candidates']:
+        raise RuntimeError(f"Unexpected Gemini response: {json.dumps(data)[:500]}")
+    return data['candidates'][0]['content']['parts'][0]['text'].strip()
 
 def read_file(path):
     with open(path, 'r', encoding='utf-8') as f:

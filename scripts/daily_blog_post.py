@@ -8,7 +8,7 @@ import requests, json
 from datetime import datetime
 
 GEMINI_KEY = "AIzaSyAnnVmRDJTCRGKBvM80tEGpKmBa-f0CFpY"
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key={GEMINI_KEY}"
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_KEY}"
 BLOG_DIR = "/home/dain/.openclaw/workspace/blog"
 POSTS_DIR = f"{BLOG_DIR}/posts"
 

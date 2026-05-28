@@ -35,6 +35,14 @@ Before doing anything else:
 3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
 4. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
 
+## Known Issues / Workarounds
+
+### gog Gmail Auth Expired
+- OAuth tokens for `gog` expire and require browser re-auth (no headless flow).
+- When `gog gmail` commands fail with "No auth", Dain must run `gog auth add dain.bentley@gmail.com --services gmail` manually.
+- **Until then**, email-related cron jobs (VIP checks, auto-drafts) are blocked.
+- Document failures in daily notes so we don't lose track of auth state.
+
 Don't ask permission. Just do it.
 
 ## Memory
