@@ -4,10 +4,12 @@ Daily Fact Blog Publisher
 Generates a daily fact via Gemini, writes to local blog files under
 /home/dain/.openclaw/workspace/blog/
 """
-import requests, json
+import requests, json, os
 from datetime import datetime
 
-GEMINI_KEY = "AIzaSyAnnVmRDJTCRGKBvM80tEGpKmBa-f0CFpY"
+GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
+if not GEMINI_KEY:
+    raise RuntimeError("GEMINI_API_KEY environment variable not set")
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_KEY}"
 BLOG_DIR = "/home/dain/.openclaw/workspace/blog"
 POSTS_DIR = f"{BLOG_DIR}/posts"
