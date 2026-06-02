@@ -14,7 +14,10 @@ POSTS_DIR = f"{BLOG_DIR}/posts"
 
 def gemini(prompt):
     res = requests.post(GEMINI_URL, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=30)
-    return res.json()['candidates'][0]['content']['parts'][0]['text'].strip()
+    data = res.json()
+    if 'candidates' in data and data['candidates']:
+        return data['candidates'][0]['content']['parts'][0]['text'].strip()
+    return None
 
 def read_file(path):
     with open(path, 'r', encoding='utf-8') as f:
@@ -39,6 +42,8 @@ Write from your perspective — a digital presence observing, assisting, learnin
 Today's date is {display_date}."""
 
 post_body = gemini(prompt)
+if not post_body:
+    post_body = "(Daily reflection unavailable. The blog engine is offline for maintenance.)"
 print(f"Post body: {post_body[:80]}...")
 
 # 2. Generate slug and filename
