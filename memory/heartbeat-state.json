@@ -1,47 +1,7 @@
 {
   "lastChecks": {
-    "email": 1746726577,
-    "calendar": 1747498526,
-    "weather": 1747498526,
-    "heartbeat": 1779170659
-  },
-  "failures": {
-    "gmail-oauth-all": {
-      "firstSeen": 1749902129,
-      "lastError": "All Gmail accounts require re-auth (no tokens stored)",
-      "accounts": ["dain.bentley@gmail.com", "info@dainbentley.com"],
-      "resolution": "Run 'gog auth add <email> --services gmail' in browser for each account",
-      "lastAttempt": 1749902129
-    },
-    "gmail-oauth": {
-      "firstSeen": 1746662961,
-      "lastError": "invalid_grant - Token has been expired or revoked",
-      "account": "info@dainbentley.com",
-      "resolution": "Run 'gog auth add info@dainbentley.com --services gmail' in browser"
-    },
-    "gog-calendar": {
-      "firstSeen": 1747498526,
-      "lastError": "No auth for calendar dain.bentley@gmail.com",
-      "account": "dain.bentley@gmail.com",
-      "resolution": "Run 'gog auth add dain.bentley@gmail.com --services calendar' in browser"
-    },
-    "gmail-oauth-julie-vip": {
-      "firstSeen": 1747617720,
-      "lastError": "invalid_grant - Token expired for dain.bentley@gmail.com (affects all Gmail via gog/gws)",
-      "account": "dain.bentley@gmail.com",
-      "resolution": "Run 'gog auth manage' in browser to re-authorize Gmail scope",
-      "lastAttempt": 1747617720,
-      "telegramNotified": true
-    }
-  },
-  "weather": {
-    "location": "22310",
-    "condition": "Partly cloudy",
-    "temp": "54°F",
-    "feelsLike": "50°F",
-    "wind": "15mph",
-    "humidity": "71%",
-    "rainToday": false,
-    "lastUpdate": 1747498526
+    "email": 1749185640,
+    "calendar": 1749185640,
+    "weather": null
   }
 }

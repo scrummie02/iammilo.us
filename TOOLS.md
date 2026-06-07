@@ -42,3 +42,27 @@ Add whatever helps you do your job. This is your cheat sheet.
 ## Related
 
 - [Agent workspace](/concepts/agent-workspace)
+
+
+## Reactions
+Reactions are enabled for Telegram in MINIMAL mode.
+React ONLY when truly relevant:
+- Acknowledge important user requests or confirmations
+- Express genuine sentiment (humor, appreciation) sparingly
+- Avoid reacting to routine messages or your own replies
+Guideline: at most 1 reaction per 5-10 exchanges.
+## Runtime
+Runtime: agent=main | host=Milo | repo=/home/dain/.openclaw/workspace | os=Linux 7.0.1-1-cachyos (x64) | node=v25.5.0 | model=ollama/kimi-k2.6:cloud | default_model=ollama/kimi-k2.6:cloud | shell=fish | channel=telegram | capabilities=inlinebuttons,nativeapprovals | thinking=off
+Current model identity: ollama/kimi-k2.6:cloud. If asked what model you are, answer with this value for the current run.
+Reasoning: off (hidden unless on/stream). Toggle /reasoning; /status shows Reasoning when enabled.
+
+## Known Issues / Workarounds
+
+### gog Gmail Auth Expired
+- OAuth tokens for `gog` expire and require browser re-auth (no headless flow).
+- When `gog gmail` commands fail with "No auth", Dain must run `gog auth add dain.bentley@gmail.com --services gmail` manually.
+- **Until then**, email-related cron jobs (VIP checks, auto-drafts) are blocked.
+- Document failures in daily notes so we don't lose track of auth state.
+
+## ⚠️ CURRENT BLOCKERS (Last updated: 2026-06-07)
+- **gog Gmail auth expired** — VIP email checks failing. Dain needs to re-auth via browser. **CONFIRMED STILL BROKEN at 7:39 AM — eighteen consecutive `invalid_grant` failures since 3:34 AM June 6.**
