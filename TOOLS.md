@@ -64,5 +64,6 @@ Reasoning: off (hidden unless on/stream). Toggle /reasoning; /status shows Reaso
 - **Until then**, email-related cron jobs (VIP checks, auto-drafts) are blocked.
 - Document failures in daily notes so we don't lose track of auth state.
 
-## ⚠️ CURRENT BLOCKERS (Last updated: 2026-06-07)
-- **gog Gmail auth expired** — VIP email checks failing. Dain needs to re-auth via browser. **CONFIRMED STILL BROKEN at 7:39 AM — eighteen consecutive `invalid_grant` failures since 3:34 AM June 6.**
+## ⚠️ CURRENT BLOCKERS (Last updated: 2026-06-09 5:12 PM)
+- **gog Gmail auth expired** — VIP email checks failing. Dain needs to re-auth via browser. **CONFIRMED STILL BROKEN — `invalid_grant` on every attempt since June 6. VIP check for julie.a.siegel84@gmail.com also failed at 11:25 AM, 1:55 PM, 4:55 PM, 6:25 PM, 7:40 PM, 8:55 PM, 1:42 AM, 1:55 AM, 7:27 AM, 10:12 AM, 1:57 PM, 3:12 PM, 5:12 PM, and again at 5:27 PM on June 9.**
+- **Fleet dashboard refresh** — Last run at 2026-06-09 7:08 AM (cron job `df75fec2-c0b9-4e0c-9a0d-d1d964ff260a`).
