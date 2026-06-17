@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # Syncs MILO brain files to Google Drive AI/MILO folder
 # Runs nightly at 2:30 AM
+# Also backs up to NFS share at 192.168.200.224:/data/Backups/cachyos/OpenClaw
 
 CORE_ID="1fERHnBTJlZa614S_vGTQLrLMh-1AKk8X"
 MEMORY_ID="1hwbC_tGHiy9nXueyCJz37wqSQFLvzyUO"
 WS="/home/dain/.openclaw/workspace"
 GOG="gog"
+NFS_BACKUP="/mnt/backups/cachyos/OpenClaw"
 ERRORS=0
 UPLOADED=0
 
@@ -34,4 +36,15 @@ for f in "$WS/memory/"*.md; do
   upload "$f" "$MEMORY_ID"
 done
 
-echo "Drive brain sync complete: $UPLOADED uploaded, $ERRORS errors"
+# NFS Backup - full workspace sync
+if [ -d "$NFS_BACKUP" ]; then
+  rsync -a --delete "$WS/" "$NFS_BACKUP/"
+  NFS_STATUS=$?
+  if [ $NFS_STATUS -eq 0 ]; then
+    echo "Drive brain sync complete: $UPLOADED uploaded, $ERRORS errors | NFS backup OK"
+  else
+    echo "Drive brain sync complete: $UPLOADED uploaded, $ERRORS errors | NFS backup FAILED (exit $NFS_STATUS)"
+  fi
+else
+  echo "Drive brain sync complete: $UPLOADED uploaded, $ERRORS errors | NFS backup SKIPPED (mount not available)"
+fi

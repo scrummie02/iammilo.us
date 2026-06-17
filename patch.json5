@@ -1,0 +1,5 @@
+{
+  "plugins": {
+    "allow": ["telegram", "ollama", "memory-core", "discord", "admin-http-rpc"]
+  }
+}
